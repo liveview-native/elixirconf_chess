@@ -15,7 +15,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
       end
     %>
     <NamespaceContext id={:game_board}>
-      <Grid modifiers={aspect_ratio(1, content_mode: :fit) |> animation(animation: :default, value: Atom.to_string(@turn))} horizontal-spacing={0} vertical-spacing={0}>
+      <Grid modifiers={animation(animation: :default, value: Atom.to_string(@turn)) |> aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain)} horizontal-spacing={0} vertical-spacing={0}>
         <GridRow :for={y <- GameBoard.y_range}>
           <Button
             :for={x <- GameBoard.x_range}
