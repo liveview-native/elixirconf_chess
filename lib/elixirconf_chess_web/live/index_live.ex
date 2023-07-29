@@ -9,6 +9,14 @@ defmodule ElixirconfChessWeb.IndexLive do
     {:ok, assign(socket, board: GameBoard.start_board, selection: nil, turn: :white)}
   end
 
+  def render(%{ platform_id: :swiftui, native: %{ platform_config: %{ user_interface_idiom: "watch" } } } = assigns) do
+    ~SWIFTUI"""
+    <VStack alignment="leading">
+      <.game_board board={@board} selection={@selection} turn={@turn} platform_id={:swiftui} native={@native} />
+    </VStack>
+    """
+  end
+
   def render(%{ platform_id: :swiftui } = assigns) do
     ~SWIFTUI"""
     <VStack alignment="leading">
@@ -18,7 +26,7 @@ defmodule ElixirconfChessWeb.IndexLive do
       </VStack>
       <Spacer />
 
-      <.game_board board={@board} selection={@selection} turn={@turn} platform_id={:swiftui} />
+      <.game_board board={@board} selection={@selection} turn={@turn} platform_id={:swiftui} native={@native} />
 
       <Spacer />
     </VStack>

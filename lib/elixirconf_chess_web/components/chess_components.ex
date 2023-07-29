@@ -28,12 +28,14 @@ defmodule ElixirconfChessWeb.ChessComponents do
                 foreground_style(tile_color({x, y}))
                   |> overlay(style: overlay_color(@selection, moves, {x, y}))
                   |> overlay(content: :content)
+                  |> clipped([])
               }
             >
               <%!-- <Text template={:content} modifiers={foreground_style({:color, :secondary}) |> bold([])}><%= GameBoard.format_position({x, y}) %></Text> --%>
               <%
                 {color, image, id} = GameBoard.piece(@board, {x, y})
-                piece_modifiers = font(font: {:system, [size: 50]}) |> foreground_style({:color, color})
+                font_size = if @native.platform_config.user_interface_idiom == "watch", do: 17, else: 50
+                piece_modifiers = font(font: {:system, [size: font_size]}) |> foreground_style({:color, color})
               %>
               <Text
                 template={:content}
