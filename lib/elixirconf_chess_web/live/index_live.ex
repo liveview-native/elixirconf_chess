@@ -66,12 +66,6 @@ defmodule ElixirconfChessWeb.IndexLive do
     end
   end
 
-  def next_turn(turn) do
-    case turn do
-      :white ->
-        :black
-      :black ->
-        :white
-    end
-  end
+  def next_turn(:white), do: :black
+  def next_turn(:black), do: :white
 end
