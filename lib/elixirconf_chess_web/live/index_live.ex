@@ -35,7 +35,11 @@ defmodule ElixirconfChessWeb.IndexLive do
 
   def render(assigns) do
     ~H"""
-    <p>Welcome to Chess</p>
+    <div class="w-full flex flex-col items-center">
+      <p>TURN</p>
+      <p class="text-4xl font-bold"><%= @turn |> Atom.to_string() |> String.capitalize() %></p>
+      <.game_board board={@board} selection={@selection} turn={@turn} platform_id={:web} native={@native} />
+    </div>
     """
   end
 

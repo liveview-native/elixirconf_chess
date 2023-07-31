@@ -52,6 +52,41 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
+  def game_board(%{ platform_id: :web } = assigns) do
+    ~H"""
+    <%
+      moves = case @selection do
+        nil ->
+          []
+        selection ->
+          GameBoard.possible_moves(@board, selection)
+      end
+    %>
+    <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square">
+      <%= for y <- GameBoard.y_range do %>
+        <button
+          :for={x <- GameBoard.x_range}
+          style={"background-color: #{css_color(tile_color({x, y}))};"}
+          class="aspect-square flex overflow-clip"
+          phx-click="select"
+          phx-value-x={x}
+          phx-value-y={y}
+        >
+          <%
+            {color, image, _} = GameBoard.piece(@board, {x, y})
+          %>
+          <div class="relative w-full h-full flex justify-center items-center">
+            <div class="absolute w-full h-full" style={"background-color: #{css_color(overlay_color(@selection, moves, {x, y}))};"}></div>
+            <p class={"text-5xl text-center " <> (if color == :white, do: "text-white", else: "text-black")}>
+              <%= image %>
+            </p>
+          </div>
+        </button>
+      <% end %>
+    </div>
+    """
+  end
+
   def tile_color({x, y}) do
     cond do
       rem(x, 2) != rem(y, 2) ->
@@ -71,4 +106,9 @@ defmodule ElixirconfChessWeb.ChessComponents do
         {:color, :white, [{:opacity, 0}]}
     end
   end
+
+  def css_color({:color, {:srgb, %{ red: red, green: green, blue: blue }}}), do: "rgb(#{red * 255}, #{green * 255}, #{blue * 255})"
+  def css_color({:color, :red, [opacity: 0.5]}), do: "rgba(255, 0, 0, 0.5)"
+  def css_color({:color, :blue, [opacity: 0.5]}), do: "rgba(0, 0, 255, 0.5)"
+  def css_color({:color, :white, [opacity: 0]}), do: "rgba(0, 0, 0, 0)"
 end
