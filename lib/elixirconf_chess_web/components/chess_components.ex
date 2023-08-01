@@ -122,7 +122,17 @@ defmodule ElixirconfChessWeb.ChessComponents do
   slot :inner_block
   def player_chip(%{ platform_id: :swiftui } = assigns) do
     ~SWIFTUI"""
-    <HStack modifiers={padding(insets: [top: 8, bottom: 8, leading: 8]) |> frame(max_width: 9999999999, alignment: :leading) |> background({:color, Colors.swiftui(if @turn == @color, do: :odd_background, else: :even_background) |> elem(1)}, in: {:rounded_rectangle, radius: 8}) |> foreground_style({:color, @color})}>
+    <HStack
+      modifiers={
+        padding(insets: [top: 8, bottom: 8, leading: 8])
+          |> frame(max_width: 9999999999, alignment: :leading)
+          |> overlay(content: :check_warning)
+          |> background({:color, Colors.swiftui(if @turn == @color, do: :odd_background, else: :even_background) |> elem(1)}, in: {:rounded_rectangle, radius: 8})
+          |> foreground_style({:color, @color})
+        }
+    >
+      <RoundedRectangle template={:check_warning} corner-radius={8} modifiers={stroke_border(content: {:color, :red}, style: [line_width: (if GameBoard.in_check?(@board, @color), do: 4, else: 0)])} />
+
       <Image system-name="person.crop.circle.fill" modifiers={font(font: {:system, :large_title})} />
       <VStack alignment="leading" modifiers={padding(:trailing, 8)}>
         <Text modifiers={font(font: {:system, :headline, [weight: :bold]})}><%= render_slot(@inner_block) %></Text>

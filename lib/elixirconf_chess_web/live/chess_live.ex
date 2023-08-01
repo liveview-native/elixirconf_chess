@@ -45,7 +45,6 @@ defmodule ElixirconfChessWeb.ChessLive do
       </.player_chip>
 
       <.game_board board={@board} selection={@selection} turn={@turn} board={@board} platform_id={:swiftui} native={@native} />
-      <%!-- <Rectangle modifiers={aspect_ratio(1, content_mode: :fit)} /> --%>
 
       <.player_chip color={@self_player} turn={@turn} board={@board} platform_id={:swiftui}>
         You
