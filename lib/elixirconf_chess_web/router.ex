@@ -18,6 +18,8 @@ defmodule ElixirconfChessWeb.Router do
     pipe_through :browser
 
     live "/", IndexLive
+    live "/lobby", LobbyLive
+    live "/chess", ChessLive
   end
 
   # Other scopes may use custom stacks.

@@ -642,7 +642,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/liveview-native/liveview-client-swiftui";
 			requirement = {
-				branch = "three-nested-comprehension-fragment";
+				branch = "native-bindings-refactor";
 				kind = branch;
 			};
 		};

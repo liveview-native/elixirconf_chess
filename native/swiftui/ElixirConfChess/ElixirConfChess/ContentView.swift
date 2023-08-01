@@ -10,7 +10,7 @@ import LiveViewNative
 
 struct ContentView: View {
     var body: some View {
-        LiveView(.localhost)
+        LiveView(.localhost, configuration: .init(navigationMode: .enabled))
     }
 }
 

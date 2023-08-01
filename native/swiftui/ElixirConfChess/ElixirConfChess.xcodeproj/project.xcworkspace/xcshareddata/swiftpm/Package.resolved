@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/liveview-native/liveview-client-swiftui",
       "state" : {
-        "branch" : "three-nested-comprehension-fragment",
-        "revision" : "205936aabd5ce00390f95481a1b9e4d6e930515a"
+        "branch" : "native-bindings-refactor",
+        "revision" : "13d60bfbfdd7ad838209f356c8749d7949c76adc"
       }
     },
     {

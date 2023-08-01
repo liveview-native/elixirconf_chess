@@ -16,7 +16,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
       end
     %>
     <NamespaceContext id={:game_board}>
-      <Grid modifiers={animation(animation: :default, value: Atom.to_string(@turn)) |> aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain)} horizontal-spacing={0} vertical-spacing={0}>
+      <Grid modifiers={animation(animation: :default, value: Atom.to_string(@turn)) |> aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain) |> corner_radius(radius: 8)} horizontal-spacing={0} vertical-spacing={0}>
         <GridRow :for={y <- GameBoard.y_range}>
           <.tile
             :for={x <- GameBoard.x_range}
@@ -44,7 +44,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
           GameBoard.possible_moves(@board, selection)
       end
     %>
-    <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square">
+    <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden">
       <%= for y <- GameBoard.y_range do %>
         <.tile
           :for={x <- GameBoard.x_range}
