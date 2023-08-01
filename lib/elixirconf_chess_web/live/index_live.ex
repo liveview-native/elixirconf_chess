@@ -15,6 +15,7 @@ defmodule ElixirconfChessWeb.IndexLive do
       <.play_button type="nx" color={:even_background} foreground={:black} image="point.3.filled.connected.trianglepath.dotted">
         Nx Match
       </.play_button>
+      <Spacer />
     </VStack>
     """
   end
@@ -45,7 +46,7 @@ defmodule ElixirconfChessWeb.IndexLive do
         phx-value-type={@type}
         modifiers={tint(color: ElixirconfChessWeb.Colors.swiftui(@color) |> elem(1)) |> foreground_style({:color, @foreground})}
       >
-        <Label system-image={@image} modifiers={frame(max_width: 99999) |> font(font: {:system, :headline})}>
+        <Label system-image={@image} modifiers={frame(max_width: 99999) |> padding(8) |> font(font: {:system, :headline})}>
           <%= render_slot(@inner_block) %>
         </Label>
     </Button>

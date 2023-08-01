@@ -115,6 +115,38 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
+  attr :color, :any
+  attr :turn, :any
+  attr :board, :any
+  attr :platform_id, :any
+  slot :inner_block
+  def player_chip(%{ platform_id: :swiftui } = assigns) do
+    ~SWIFTUI"""
+    <HStack modifiers={padding(insets: [top: 8, bottom: 8, leading: 8]) |> frame(max_width: 9999999999, alignment: :leading) |> background({:color, Colors.swiftui(if @turn == @color, do: :odd_background, else: :even_background) |> elem(1)}, in: {:rounded_rectangle, radius: 8}) |> foreground_style({:color, @color})}>
+      <Image system-name="person.crop.circle.fill" modifiers={font(font: {:system, :large_title})} />
+      <VStack alignment="leading" modifiers={padding(:trailing, 8)}>
+        <Text modifiers={font(font: {:system, :headline, [weight: :bold]})}><%= render_slot(@inner_block) %></Text>
+        <Text modifiers={font(font: {:system, :caption})}><%= @color |> Atom.to_string() |> String.capitalize() %></Text>
+      </VStack>
+      <%
+        captures = Enum.map(
+          GameBoard.captures(@board, @color),
+          fn {_, type, id} -> {id, GameBoard.piece(type)} end
+        )
+      %>
+      <ScrollView axes="horizontal" modifiers={font(font: {:system, :large_title}) |> foreground_style({:color, GameBoard.enemy(@color)})}>
+        <HStack>
+          <Text
+            :for={{id, image} <- captures}
+            id={"#{id}"}
+            verbatim={image}
+          />
+        </HStack>
+      </ScrollView>
+    </HStack>
+    """
+  end
+
   def tile_color({x, y}) do
     cond do
       rem(x, 2) != rem(y, 2) ->

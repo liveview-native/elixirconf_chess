@@ -227,4 +227,37 @@ defmodule ElixirconfChess.GameBoard do
     king = locate(board, {turn, :king})
     possible_moves(board, enemy(turn)) |> Enum.member?(king)
   end
+
+  def all_pieces(board) do
+    Enum.reduce(
+      board,
+      [],
+      fn {_, row}, acc ->
+        acc ++ Enum.reduce(
+          row,
+          [],
+          fn
+            {_, piece}, acc ->
+              [piece | acc]
+            _, acc ->
+              acc
+          end
+        )
+      end
+    )
+  end
+
+  def captures(board, turn) do
+    enemy = enemy(turn)
+    current_pieces = all_pieces(board)
+    Enum.filter(
+      all_pieces(start_board()),
+      fn
+        {^enemy, _, _} = piece ->
+          !Enum.member?(current_pieces, piece)
+        _ ->
+          false
+      end
+    )
+  end
 end

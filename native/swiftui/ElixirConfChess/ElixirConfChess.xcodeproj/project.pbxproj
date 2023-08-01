@@ -642,7 +642,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/liveview-native/liveview-client-swiftui";
 			requirement = {
-				branch = "native-bindings-refactor";
+				branch = "noderef-foreach-id";
 				kind = branch;
 			};
 		};
