@@ -5,7 +5,7 @@ defmodule ElixirconfChess.MixProject do
     [
       app: :elixirconf_chess,
       version: "0.1.0",
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -47,9 +47,8 @@ defmodule ElixirconfChess.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-
       {:live_view_native, "~> 0.0.8"},
-      {:live_view_native_swift_ui, "~> 0.0.9"},
+      {:live_view_native_swift_ui, "~> 0.0.9"}
     ]
   end
 
