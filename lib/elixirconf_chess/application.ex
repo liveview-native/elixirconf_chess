@@ -10,8 +10,6 @@ defmodule ElixirconfChess.Application do
     children = [
       # Start the Telemetry supervisor
       ElixirconfChessWeb.Telemetry,
-      # Start the Ecto repository
-      ElixirconfChess.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: ElixirconfChess.PubSub},
       # Start the Endpoint (http/https)

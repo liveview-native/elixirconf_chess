@@ -7,9 +7,6 @@
 # General application configuration
 import Config
 
-config :elixirconf_chess,
-  ecto_repos: [ElixirconfChess.Repo]
-
 # Configures the endpoint
 config :elixirconf_chess, ElixirconfChessWeb.Endpoint,
   url: [host: "localhost"],

@@ -1,15 +1,5 @@
 import Config
 
-# Configure your database
-config :elixirconf_chess, ElixirconfChess.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "elixirconf_chess_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -28,6 +18,7 @@ config :elixirconf_chess, ElixirconfChessWeb.Endpoint,
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
+
 
 # ## SSL Support
 #
