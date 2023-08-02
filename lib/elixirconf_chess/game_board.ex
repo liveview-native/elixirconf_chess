@@ -24,6 +24,21 @@ defmodule ElixirconfChess.GameBoard do
 
   def is_empty?(board, position), do: value(board, position) == nil
 
+  def game_state(board) do
+    white_moves = possible_moves(board, :white, true)
+    black_moves = possible_moves(board, :black, true)
+    case {white_moves, black_moves} do
+      {[], []} ->
+        :draw
+      {[], _} ->
+        {:checkmate, :white}
+      {_, []} ->
+        {:checkmate, :black}
+      {_, _} ->
+        :active
+    end
+  end
+
   def is_self?(turn, board, position) do
     case value(board, position) do
       {^turn, _, _} ->
@@ -88,14 +103,6 @@ defmodule ElixirconfChess.GameBoard do
   def piece(:knight), do: "♞"
   def piece(:pawn), do: "♟︎"
 
-  def possible_moves(board, turn) when turn in [:white, :black] do
-    Enum.reduce(
-      board,
-      [],
-      fn {y, row}, acc -> acc ++ row_moves(board, y, row, turn) end
-    )
-  end
-
   def possible_moves(board, {x, y} = position) when is_number(x) and is_number(y) do
     position_value = value(board, position)
     {turn, _, _} = position_value
@@ -106,6 +113,14 @@ defmodule ElixirconfChess.GameBoard do
           !in_check?(move(board, position, target), turn)
         end) # the player cannot put themselves in check
     end
+  end
+
+  def possible_moves(board, turn, discard_checks) when turn in [:white, :black] do
+    Enum.reduce(
+      board,
+      [],
+      fn {y, row}, acc -> acc ++ row_moves(board, y, row, turn, discard_checks) end
+    )
   end
 
   def possible_moves(_board, _position, nil), do: []
@@ -185,12 +200,13 @@ defmodule ElixirconfChess.GameBoard do
     for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
   end
 
-  defp row_moves(board, y, row, turn) do
+  defp row_moves(board, y, row, turn, discard_checks) do
     Enum.reduce(
       row,
       [],
       fn
-        {x, {^turn, _, _} = value}, acc -> acc ++ possible_moves(board, {x, y}, value)
+        {x, {^turn, _, _} = value}, acc ->
+          acc ++ (if discard_checks, do: possible_moves(board, {x, y}), else: possible_moves(board, {x, y}, value))
         _, acc -> acc
       end
     )
@@ -225,7 +241,7 @@ defmodule ElixirconfChess.GameBoard do
 
   def in_check?(board, turn) do
     king = locate(board, {turn, :king})
-    possible_moves(board, enemy(turn)) |> Enum.member?(king)
+    possible_moves(board, enemy(turn), false) |> Enum.member?(king)
   end
 
   def all_pieces(board) do

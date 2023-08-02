@@ -7,14 +7,6 @@ defmodule ElixirconfChessWeb.ChessComponents do
 
   def game_board(%{ platform_id: :swiftui } = assigns) do
     ~SWIFTUI"""
-    <%
-      moves = case @selection do
-        nil ->
-          []
-        selection ->
-          GameBoard.possible_moves(@board, selection)
-      end
-    %>
     <NamespaceContext id={:game_board}>
       <Grid modifiers={animation(animation: :default, value: Atom.to_string(@turn)) |> aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain) |> corner_radius(radius: 8)} horizontal-spacing={0} vertical-spacing={0}>
         <GridRow :for={y <- GameBoard.y_range}>
@@ -24,7 +16,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
             y={y}
             board={@board}
             selection={@selection}
-            moves={moves}
+            moves={@moves}
             native={@native}
             platform_id={:swiftui}
           />
