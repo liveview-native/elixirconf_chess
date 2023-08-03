@@ -11,6 +11,9 @@ import LiveViewNative
 struct ContentView: View {
     var body: some View {
         LiveView<ChessRegistry>(.localhost, configuration: .init(navigationMode: .enabled))
+            #if os(macOS)
+            .frame(idealWidth: 500, idealHeight: 700)
+            #endif
     }
 }
 
