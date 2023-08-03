@@ -237,8 +237,6 @@ defmodule ElixirconfChess.GameBoard do
     end
   end
 
-  def format_position({x, y}), do: "#{List.to_string([Enum.at(?a..?h, x)])}#{8 - y}"
-
   def in_check?(board, turn) do
     king = locate(board, {turn, :king})
     possible_moves(board, enemy(turn), false) |> Enum.member?(king)

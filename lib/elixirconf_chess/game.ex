@@ -70,7 +70,8 @@ defmodule ElixirconfChess.Game do
     |> if do
       board = GameBoard.move(state.game_state.board, selection, new_position)
       game_state_status = GameBoard.game_state(board)
-      game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn)}
+      move_history = [ElixirconfChess.AlgebraicNotation.move_algebra(state.game_state.board, selection, new_position) | state.game_state.move_history]
+      game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
       notify_game_state(game_state, from)
       state = %{state | game_state: game_state}
       {:reply, game_state, state}
