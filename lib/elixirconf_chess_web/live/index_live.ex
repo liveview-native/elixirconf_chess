@@ -2,11 +2,14 @@ defmodule ElixirconfChessWeb.IndexLive do
   use Phoenix.LiveView
   use LiveViewNative.LiveView
 
+  alias ElixirconfChess.GameMaster
+
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    ElixirconfChess.PubSub.subscribe_lobby()
+    {:ok, assign(socket, :games, GameMaster.list_games())}
   end
 
-  def render(%{ platform_id: :swiftui } = assigns) do
+  def render(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <VStack modifiers={navigation_title(title: "Chess") |> button_style(style: :bordered_prominent) |> padding([])}>
       <.play_button type="online" color={:odd_background} foreground={:white} image="network">
@@ -24,11 +27,13 @@ defmodule ElixirconfChessWeb.IndexLive do
     ~H"""
     <div class="w-full flex flex-col items-center gap-2">
       <p class="text-5xl font-bold">Chess</p>
-      <button phx-click="play" phx-value-type="online" style={"background-color: #{ElixirconfChessWeb.Colors.web(:odd_background)};"} class="p-2 font-bold text-white rounded">
-        Online Match
-      </button>
-      <button phx-click="play" phx-value-type="nx" style={"background-color: #{ElixirconfChessWeb.Colors.web(:even_background)};"} class="p-2 font-bold rounded">
-        Nx Match
+      <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
+        <button phx-click="join" phx-value-id={game_id} style={"background-color: #{background_color(index)};"} class="p-2 font-bold text-white rounded">
+          Join Game
+        </button>
+      <% end %>
+      <button phx-click="create" style={"background-color: #{background_color(map_size(@games))};"} class="p-2 font-bold rounded">
+        Create Game
       </button>
     </div>
     """
@@ -39,6 +44,7 @@ defmodule ElixirconfChessWeb.IndexLive do
   attr :foreground, :any
   attr :image, :string
   slot :inner_block
+
   def play_button(assigns) do
     ~SWIFTUI"""
     <Button
@@ -53,7 +59,19 @@ defmodule ElixirconfChessWeb.IndexLive do
     """
   end
 
-  def handle_event("play", %{ "type" => type }, socket) do
-    {:noreply, push_navigate(socket, to: "/lobby?type=#{type}", replace: false)}
+  def handle_event("join", %{"id" => id}, socket) do
+    {:noreply, push_navigate(socket, to: "/game/#{id}", replace: false)}
+  end
+
+  def handle_event("create", _, socket) do
+    game_id = GameMaster.create_game()
+    {:noreply, push_navigate(socket, to: "/game/#{game_id}", replace: false)}
+  end
+
+  def background_color(index) when rem(index, 2) == 0, do: ElixirconfChessWeb.Colors.web(:odd_background)
+  def background_color(_index), do: ElixirconfChessWeb.Colors.web(:even_background)
+
+  def handle_info({:lobby_update, games}, socket) do
+    {:noreply, assign(socket, :games, games)}
   end
 end
