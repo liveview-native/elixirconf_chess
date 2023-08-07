@@ -6,7 +6,7 @@ defmodule ElixirconfChessWeb.IndexLive do
     {:ok, socket}
   end
 
-  def render(%{ platform_id: :swiftui } = assigns) do
+  def render(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <VStack modifiers={navigation_title(title: "Chess") |> button_style(style: :bordered_prominent) |> padding([])}>
       <.play_button type="online" color={:odd_background} foreground={:white} image="network">
@@ -24,10 +24,20 @@ defmodule ElixirconfChessWeb.IndexLive do
     ~H"""
     <div class="w-full flex flex-col items-center gap-2">
       <p class="text-5xl font-bold">Chess</p>
-      <button phx-click="play" phx-value-type="online" style={"background-color: #{ElixirconfChessWeb.Colors.web(:odd_background)};"} class="p-2 font-bold text-white rounded">
+      <button
+        phx-click="play"
+        phx-value-type="online"
+        style={"background-color: #{ElixirconfChessWeb.Colors.web(:odd_background)};"}
+        class="p-2 font-bold text-white rounded"
+      >
         Online Match
       </button>
-      <button phx-click="play" phx-value-type="nx" style={"background-color: #{ElixirconfChessWeb.Colors.web(:even_background)};"} class="p-2 font-bold rounded">
+      <button
+        phx-click="play"
+        phx-value-type="nx"
+        style={"background-color: #{ElixirconfChessWeb.Colors.web(:even_background)};"}
+        class="p-2 font-bold rounded"
+      >
         Nx Match
       </button>
     </div>
@@ -39,6 +49,7 @@ defmodule ElixirconfChessWeb.IndexLive do
   attr :foreground, :any
   attr :image, :string
   slot :inner_block
+
   def play_button(assigns) do
     ~SWIFTUI"""
     <Button
@@ -53,7 +64,7 @@ defmodule ElixirconfChessWeb.IndexLive do
     """
   end
 
-  def handle_event("play", %{ "type" => type }, socket) do
+  def handle_event("play", %{"type" => type}, socket) do
     {:noreply, push_navigate(socket, to: "/lobby?type=#{type}", replace: false)}
   end
 end
