@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/liveview-native/liveview-client-swiftui",
       "state" : {
-        "branch" : "noderef-foreach-id",
-        "revision" : "00336a5851c8614a758d51f07d5ec1ea8dfe28c4"
+        "branch" : "optimize-view-bodies",
+        "revision" : "ad0762b85fc67421990033134e2861579b920958"
       }
     },
     {
