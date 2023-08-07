@@ -6,9 +6,19 @@ defmodule ElixirconfChessWeb.Colors do
   def rgba(:target), do: %{ red: 1, green: 0, blue: 0, opacity: 0.5 }
   def rgba(:clear), do: %{ red: 1, green: 1, blue: 1, opacity: 0 }
 
-  def swiftui(color), do: {:color, {:srgb, rgba(color)}, [opacity: rgba(color).opacity]}
+  def swiftui(color) do
+    case rgba(color) do
+      %{ opacity: 1 } = color ->
+        {:color, {:srgb, color}}
+      color ->
+        {:color, {:srgb, color}, [opacity: color.opacity]}
+    end
+  end
   def web(color) do
     %{ red: red, green: green, blue: blue, opacity: opacity } = rgba(color)
     "rgba(#{red * 255}, #{green * 255}, #{blue * 255}, #{opacity})"
   end
+
+  def evaluate(color, :swiftui), do: swiftui(color)
+  def evaluate(color, :web), do: web(color)
 end
