@@ -2,6 +2,7 @@ defmodule ElixirconfChessWeb.IndexLive do
   use Phoenix.LiveView
   use LiveViewNative.LiveView
 
+  alias ElixirconfChess.GameState
   alias ElixirconfChess.GameMaster
 
   def mount(_params, _session, socket) do
@@ -86,10 +87,14 @@ defmodule ElixirconfChessWeb.IndexLive do
   def background_color(index, platform) when rem(index, 2) == 0, do: ElixirconfChessWeb.Colors.evaluate(:odd_background, platform)
   def background_color(_index, platform), do: ElixirconfChessWeb.Colors.evaluate(:even_background, platform)
 
-  def button_foreground(index, platform) when rem(index, 2) == 0, do: :white
-  def button_foreground(_index, platform), do: :black
+  def button_foreground(index, _platform) when rem(index, 2) == 0, do: :white
+  def button_foreground(_index, _platform), do: :black
 
-  def handle_info({:lobby_update, games}, socket) do
-    {:noreply, assign(socket, :games, games)}
+  def handle_info({:game_update, id, %GameState{state: :active} = game}, socket) do
+    {:noreply, assign(socket, :games, Map.put(socket.assigns.games, id, game))}
+  end
+
+  def handle_info({:game_update, id, %GameState{}}, socket) do
+    {:noreply, assign(socket, :games, Map.delete(socket.assigns.games, id))}
   end
 end

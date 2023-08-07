@@ -3,6 +3,7 @@ defmodule ElixirconfChessWeb.ChessLive do
   use LiveViewNative.LiveView
 
   import ElixirconfChessWeb.ChessComponents, only: [game_board: 1, player_chip: 1]
+  alias ElixirconfChess.PubSub
   alias ElixirconfChess.GameBoard
   alias ElixirconfChess.GameState
 
@@ -18,6 +19,8 @@ defmodule ElixirconfChessWeb.ChessLive do
 
       :else ->
         {player_color, game_state} = Game.join(id)
+
+        PubSub.subscribe_game(id)
 
         socket =
           socket
@@ -161,11 +164,8 @@ defmodule ElixirconfChessWeb.ChessLive do
 
               cond do
                 Enum.member?(valid_moves, new_position) ->
-                  case Game.move(socket.assigns.game_id, selection, new_position) do
-                    :not_your_turn -> socket
-                    new_game_state -> assign(socket, :game_state, new_game_state)
-                  end
-                  |> assign(:selection, nil)
+                  Game.move(socket.assigns.game_id, selection, new_position)
+                  assign(socket, :selection, nil)
 
                 is_valid_selection ->
                   assign(socket, selection: new_position)
@@ -181,7 +181,8 @@ defmodule ElixirconfChessWeb.ChessLive do
     end
   end
 
-  def handle_info({:game_state_update, game_state}, socket) do
+  def handle_info({:game_update, id, game_state}, socket) do
+    ^id = socket.assigns.game_id
     {:noreply, assign(socket, :game_state, game_state)}
   end
 end
