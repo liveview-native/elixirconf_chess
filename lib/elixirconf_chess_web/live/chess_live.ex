@@ -135,8 +135,13 @@ defmodule ElixirconfChessWeb.ChessLive do
       socket
       |> select({String.to_integer(x), String.to_integer(y)})
       |> update(:moves, fn
-        _, %{selection: nil} -> []
-        _, %{game_state: %GameState{board: board}, selection: selection} -> GameBoard.possible_moves(board, selection)
+        _, %{selection: nil} ->
+          []
+
+        _, %{game_state: %GameState{board: board}, selection: selection} ->
+          board
+          |> GameBoard.possible_moves(selection)
+          |> Enum.map(& &1.destination)
       end)
 
     {:noreply, socket}
@@ -160,7 +165,10 @@ defmodule ElixirconfChessWeb.ChessLive do
               end
 
             selection ->
-              valid_moves = GameBoard.possible_moves(socket.assigns.game_state.board, selection)
+              valid_moves =
+                socket.assigns.game_state.board
+                |> GameBoard.possible_moves(selection)
+                |> Enum.map(& &1.destination)
 
               cond do
                 Enum.member?(valid_moves, new_position) ->
