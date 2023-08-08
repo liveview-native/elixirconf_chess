@@ -329,7 +329,8 @@ defmodule ElixirconfChess.GameBoard do
 
   def in_check?(board, turn) do
     king = locate(board, {turn, :king})
-    king in possible_moves(board, enemy(turn), false)
+    destinations = board |> possible_moves(enemy(turn), false) |> Enum.map(& &1.destination)
+    king in destinations
   end
 
   def all_pieces(board) do
