@@ -12,7 +12,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
         nil ->
           []
         selection ->
-          GameBoard.possible_moves(@board, selection)
+          GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
       end
     %>
     <NamespaceContext id={:game_board} modifiers={layout_priority(1)}>
@@ -41,7 +41,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
         nil ->
           []
         selection ->
-          GameBoard.possible_moves(@board, selection)
+          GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
       end
     %>
     <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden">
