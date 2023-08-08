@@ -3,6 +3,7 @@ defmodule ElixirconfChess.Game do
 
   alias ElixirconfChess.GameBoard
   alias ElixirconfChess.GameState
+  alias ElixirconfChess.PubSub
 
   require Logger
 
@@ -72,9 +73,9 @@ defmodule ElixirconfChess.Game do
       game_state_status = GameBoard.game_state(board)
       move_history = [ElixirconfChess.AlgebraicNotation.move_algebra(state.game_state.board, board, selection, new_position) | state.game_state.move_history]
       game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
-      notify_game_state(game_state, from)
       state = %{state | game_state: game_state}
-      {:reply, game_state, state}
+      PubSub.broadcast_game(state.id, state.game_state)
+      {:reply, :ok, state}
     else
       {:reply, :not_your_turn, state}
     end
@@ -82,16 +83,6 @@ defmodule ElixirconfChess.Game do
 
   defp other_turn(:white), do: :black
   defp other_turn(:black), do: :white
-
-  defp notify_game_state(%GameState{} = game_state, except) do
-    maybe_notify(game_state, game_state.white, except)
-    maybe_notify(game_state, game_state.black, except)
-    Enum.map(game_state.spectators, &maybe_notify(game_state, &1, except))
-  end
-
-  defp maybe_notify(_game_state, nil, _pid), do: nil
-  defp maybe_notify(_game_state, pid, pid), do: nil
-  defp maybe_notify(game_state, pid, _other_pid), do: send(pid, {:game_state_update, game_state})
 
   defp clear_disconnected_players(%GameState{white: wp, black: bp} = game_state) do
     game_state =

@@ -36,7 +36,7 @@ defmodule ElixirconfChess.GameMaster do
     id = Game.get_id(pid)
     game_state = Game.get_game_state(id)
     state = %{state | games: Map.put(state.games, id, game_state)}
-    ElixirconfChess.PubSub.broadcast_lobby(state.games)
+    ElixirconfChess.PubSub.broadcast_game(id, game_state)
     {:reply, id, state}
   end
 end
