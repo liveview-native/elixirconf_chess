@@ -1,4 +1,6 @@
 defmodule ElixirconfChess.GameBoard do
+  alias ElixirconfChess.GameBoard.Move
+
   @start_board %{
     0 => %{
       0 => {:black, :rook, 1},
@@ -42,12 +44,6 @@ defmodule ElixirconfChess.GameBoard do
       7 => {:white, :rook, 32}
     }
   }
-
-  defmodule Move do
-    defstruct [:source, :destination]
-
-    def new(source, destination), do: %__MODULE__{source: source, destination: destination}
-  end
 
   def start_board, do: @start_board
 
