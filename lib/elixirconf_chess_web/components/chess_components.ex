@@ -5,7 +5,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
   alias ElixirconfChess.GameBoard
   alias ElixirconfChessWeb.Colors
 
-  def game_board(%{ platform_id: :swiftui } = assigns) do
+  def game_board(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <%
       moves = case @selection do
@@ -34,34 +34,25 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
-  def game_board(%{ platform_id: :web } = assigns) do
+  def game_board(%{platform_id: :web} = assigns) do
     ~H"""
-    <%
-      moves = case @selection do
+    <% moves =
+      case @selection do
         nil ->
           []
+
         selection ->
           GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
-      end
-    %>
+      end %>
     <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden">
       <%= for y <- GameBoard.y_range do %>
-        <.tile
-          :for={x <- GameBoard.x_range}
-          x={x}
-          y={y}
-          board={@board}
-          selection={@selection}
-          moves={moves}
-          native={@native}
-          platform_id={:web}
-        />
+        <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} native={@native} platform_id={:web} />
       <% end %>
     </div>
     """
   end
 
-  def tile(%{ platform_id: :swiftui } = assigns) do
+  def tile(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <Button
       phx-click="select"
@@ -93,18 +84,10 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
-  def tile(%{ platform_id: :web } = assigns) do
+  def tile(%{platform_id: :web} = assigns) do
     ~H"""
-    <button
-      style={"background-color: #{tile_color({@x, @y}) |> Colors.web};"}
-      class="aspect-square flex overflow-clip"
-      phx-click="select"
-      phx-value-x={@x}
-      phx-value-y={@y}
-    >
-      <%
-        {color, image, _} = GameBoard.piece(@board, {@x, @y})
-      %>
+    <button style={"background-color: #{tile_color({@x, @y}) |> Colors.web};"} class="aspect-square flex overflow-clip" phx-click="select" phx-value-x={@x} phx-value-y={@y}>
+      <% {color, image, _} = GameBoard.piece(@board, {@x, @y}) %>
       <div class="relative w-full h-full flex justify-center items-center">
         <div class="absolute w-full h-full" style={"background-color: #{overlay_color(@selection, @moves, {@x, @y}) |> Colors.web};"}></div>
         <p class={"text-5xl text-center z-10 " <> (if color == :white, do: "text-white", else: "text-black")}>
@@ -120,7 +103,8 @@ defmodule ElixirconfChessWeb.ChessComponents do
   attr :board, :any
   attr :platform_id, :any
   slot :inner_block
-  def player_chip(%{ platform_id: :swiftui } = assigns) do
+
+  def player_chip(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <HStack
       modifiers={
@@ -159,8 +143,9 @@ defmodule ElixirconfChessWeb.ChessComponents do
 
   def tile_color({x, y}) do
     cond do
-      rem(x, 2) != rem(y, 2) ->
+      rem(x, 2) == rem(y, 2) ->
         :even_background
+
       true ->
         :odd_background
     end
@@ -170,8 +155,10 @@ defmodule ElixirconfChessWeb.ChessComponents do
     cond do
       Enum.member?(moves, position) ->
         :target
+
       position == selection ->
         :selection
+
       true ->
         :clear
     end
