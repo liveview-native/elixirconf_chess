@@ -136,24 +136,16 @@ defmodule ElixirconfChessWeb.ChessLive do
       |> select({String.to_integer(x), String.to_integer(y)})
       |> update(:moves, fn
         _, %{selection: nil, game_state: %GameState{board: board}, player_color: player_color} ->
-          move = ElixirconfChess.AI.choose_next_move(board, player_color)
+          # move = ElixirconfChess.AI.choose_next_move(board, player_color)
 
-          [move]
-          |> IO.inspect(label: "chosen move")
+          []
 
-        _, %{game_state: %GameState{board: board}, selection: selection} ->
-          board
-          |> GameBoard.possible_moves(selection)
-          |> Enum.map(fn %{destination: dest} = move ->
-            eval =
-              board
-              |> GameBoard.move(move)
-              |> ElixirconfChess.AI.eval()
+        # |> IO.inspect(label: "chosen move")
 
-            {dest, eval}
-          end)
-          |> IO.inspect(label: "moves and evals")
-          |> Enum.map(&elem(&1, 0))
+        _, %{game_state: %GameState{board: board, turn: turn}, selection: selection} ->
+          move = ElixirconfChess.AI.choose_move(board, turn)
+
+          board = GameBoard.move(board, move)
       end)
 
     {:noreply, socket}
