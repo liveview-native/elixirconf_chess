@@ -21,63 +21,20 @@ defmodule ElixirconfChess.AI do
   ]
 
   @minimax_depth 3
-  @min_score -20
-  @max_score 20
+  @min_score -20_000
+  @max_score 20_000
 
-  def choose_next_move(board, current_player) do
-    minimax(board, current_player, @minimax_depth)
-  end
+  def choose_move(board) do
+    input = board_to_input(board)
 
-  defp minimax(board, current_player, depth, alpha \\ @min_score, beta \\ @max_score)
+    %Move{} =
+      move =
+      Nx.Serving.batched_run(ChessAI.Serving, Nx.Batch.stack([input]))
+      |> Nx.flatten()
+      |> Nx.to_number()
+      |> move_index_to_source_dest()
 
-  defp minimax(board, _current_player, 0, _alpha, _beta) do
-    eval(board)
-  end
-
-  defp minimax(board, current_player, depth, alpha, beta) do
-    case GameBoard.game_state(board) do
-      {:checkmate, ^current_player} ->
-        1000
-
-      {:checkmate, _} ->
-        -1000
-
-      :draw ->
-        0
-
-      _ ->
-        # Here we can do some random sampling if we want to approximate MonteCarlo search instead
-        moves = GameBoard.possible_moves(board, current_player, true)
-
-        score =
-          if current_player == :max_player do
-            max_value(board, moves, depth, alpha, beta)
-          else
-            min_value(board, moves, depth, alpha, beta)
-          end
-
-        score
-    end
-  end
-
-  defp max_value(board, [], _depth, alpha, _beta), do: eval(board)
-
-  defp max_value(board, [move | rest], depth, alpha, beta) do
-    # TO-DO: implement the move/2 function
     to_eval_board = GameBoard.move(board, move)
-    score = minimax(to_eval_board, :min_player, depth - 1, alpha, beta)
-    new_alpha = if score > alpha, do: score, else: alpha
-    if new_alpha >= beta, do: new_alpha, else: max_value(board, rest, depth, new_alpha, beta)
-  end
-
-  defp min_value(board, [], _depth, _alpha, beta), do: eval(board)
-
-  defp min_value(board, [move | rest], depth, alpha, beta) do
-    # TO-DO: implement the move/2 function
-    to_eval_board = GameBoard.move(board, move)
-    score = minimax(to_eval_board, :max_player, depth - 1, alpha, beta)
-    new_beta = if score < beta, do: score, else: beta
-    if new_beta <= alpha, do: new_beta, else: min_value(board, rest, depth, alpha, new_beta)
   end
 
   def serving do
@@ -90,14 +47,14 @@ defmodule ElixirconfChess.AI do
       fn ->
         # Build the Axon model and load params (usually from file)
         model = model()
-        filename = Path.join(to_string(:code.priv_dir(:chess_ai)), "ai_weights.nx")
+        filename = Path.join(to_string(:code.priv_dir(:elixirconf_chess)), "ai_weights.nx")
         params = filename |> File.read!() |> Nx.deserialize()
 
         # Build the prediction defn function
         {_init_fun, predict_fun} = Axon.build(model)
 
         inputs_template = %{
-          "board" => Nx.template({batch_size, 8, 8, 14}, :u8)
+          "board" => Nx.template({batch_size, 8, 8, 1}, :s8)
           # "meta" => Nx.template({batch_size, 2}, :u8)
         }
 
@@ -109,7 +66,7 @@ defmodule ElixirconfChess.AI do
         # The returned function is called for every accumulated batch
         fn inputs ->
           inputs = Nx.Batch.pad(inputs, batch_size - inputs.size)
-          predict_fun.(params, inputs)
+          predict_fun.(params, %{"board" => inputs})
         end
       end,
       batch_size: batch_size
@@ -117,66 +74,15 @@ defmodule ElixirconfChess.AI do
   end
 
   defp model do
-    board_input = Axon.input("board", shape: {nil, 8, 8, 14})
-    # meta_input = Axon.input("meta", shape: {nil, 2})
+    board_input = Axon.input("board", shape: {nil, 8, 8, 1})
 
-    # board input is a tensor that contains channels for
-    # pawn, rook, knight, bishop, queen and king for white and black, in this order.
-    # 1 represents that the given (piece, color) combination is present in that position
-
-    conv_batch_norm = fn layer, num_filters, kernel_size ->
-      layer
-      |> Axon.conv(num_filters, kernel_size: kernel_size, padding: :same, activation: :linear)
-      |> Axon.batch_norm()
-      |> Axon.relu()
-    end
-
-    res_net = fn input, num_filters, kernel_size ->
-      first = conv_batch_norm.(input, num_filters, kernel_size)
-
-      first
-      |> conv_batch_norm.(num_filters, kernel_size)
-      |> conv_batch_norm.(num_filters, kernel_size)
-      |> Axon.add(first)
-      |> Axon.relu()
-    end
-
-    board_net =
+    model =
       board_input
-      |> conv_batch_norm.(16, 3)
-      |> res_net.(32, 3)
-      |> conv_batch_norm.(16, 3)
       |> Axon.flatten()
-
-    # meta_net = meta_input
-
-    # precision_policy =
-    #   Axon.MixedPrecision.create_policy(params: {:f, 32}, output: {:f, 32}, compute: {:f, 16})
-
-    # Axon.concatenate([meta_net, board_net])
-    eval_head =
-      board_net
-      |> Axon.dense(100, activation: :relu)
-      |> Axon.dropout(rate: 0.5)
+      |> Axon.dense(512, activation: :relu)
+      |> Axon.dense(1024, activation: :relu)
+      |> Axon.dense(512, activation: :relu)
       |> Axon.dense(1, activation: :tanh)
-
-    from_out =
-      board_net
-      |> Axon.dense(100, activation: :relu)
-      |> Axon.dropout(rate: 0.5)
-      |> Axon.dense(64, activation: :softmax)
-      |> Axon.nx(&Nx.reshape(&1, {:auto, 1, 8, 8}))
-
-    to_out =
-      board_net
-      |> Axon.dense(100, activation: :relu)
-      |> Axon.dropout(rate: 0.5)
-      |> Axon.dense(64, activation: :softmax)
-      |> Axon.nx(&Nx.reshape(&1, {:auto, 1, 8, 8}))
-
-    move_head = Axon.concatenate(from_out, to_out, axis: 1)
-
-    Axon.container(%{eval: eval_head, move: move_head})
   end
 
   def board_to_input(board) do
@@ -186,7 +92,7 @@ defmodule ElixirconfChess.AI do
       |> Enum.map(fn piece -> %{piece | row: 7 - piece.row} end)
       |> Enum.group_by(&{&1.type, &1.color})
 
-    input_layers = Nx.broadcast(Nx.u8(0), {8, 8, 14})
+    input_layers = Nx.broadcast(Nx.u8(0), {8, 8, 12})
 
     input_layers =
       @piece_layers
@@ -206,16 +112,18 @@ defmodule ElixirconfChess.AI do
 
         updates = Nx.broadcast(Nx.u8(1), {Nx.axis_size(indices, 0)})
 
-        Nx.indexed_put(acc, indices, updates)
+        Nx.indexed_add(acc, indices, updates)
       end)
 
-    # Fill attacked squares
-    input_layers =
-      input_layers
-      |> set_squares_that_color_attacks(board, :white)
-      |> set_squares_that_color_attacks(board, :black)
+    move_idx =
+      board
+      |> GameBoard.possible_moves(current_player, true)
+      |> Enum.map(fn %{source: {source_x, source_y}, destination: {dest_x, dest_y}} ->
+        move = Move.new({source_x, 7 - source_y}, {dest_x, 7 - dest_y})
+        move_to_index(move)
+      end)
 
-    %{"board" => input_layers}
+    %{"board" => input_layers, "valid_moves_mask" => moves_mask(moves)}
   end
 
   defp all_pieces(board) do
@@ -253,7 +161,7 @@ defmodule ElixirconfChess.AI do
           |> put_in([row, col + direction], nil)
           |> GameBoard.possible_moves({row, col})
 
-        %{type: type, row: row, col: col} ->
+        %{type: _type, row: row, col: col} ->
           GameBoard.possible_moves(board, {row, col})
       end)
       |> Enum.map(fn {x, y} ->
@@ -270,5 +178,26 @@ defmodule ElixirconfChess.AI do
 
         Nx.indexed_put(board, indices, updates)
     end
+  end
+
+  defp moves_mask(moves_idx) do
+    moves_idx_t = Nx.tensor(moves_idx)
+
+    base = Nx.broadcast(Nx.u8(0), {1, 4096})
+
+    Nx.indexed_put(base, moves_idx_t, Nx.broadcast(Nx.u8(1), {Nx.size(moves_idx_t)}))
+  end
+
+  defp move_to_index(move)
+  defp index_to_move(index)
+
+  for start_sq <- 0..63, dest_sq <- 0..63 do
+    start_move = {rem(start_sq, 8), div(start_sq, 8)}
+    dest_move = {rem(dest_sq, 8), div(dest_sq, 8)}
+
+    sq_idx = start_sq * 64 + dest_sq
+
+    defp move_to_index(%Move{source: unquote(start_move), destination: unquote(dest_move)}), do: unquote(sq_idx)
+    defp index_to_move(unquote(sq_idx)), do: %Move{source: unquote(start_move), destination: unquote(dest_move)}
   end
 end

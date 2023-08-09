@@ -135,13 +135,25 @@ defmodule ElixirconfChessWeb.ChessLive do
       socket
       |> select({String.to_integer(x), String.to_integer(y)})
       |> update(:moves, fn
-        _, %{selection: nil} ->
-          []
+        _, %{selection: nil, game_state: %GameState{board: board}, player_color: player_color} ->
+          move = ElixirconfChess.AI.choose_next_move(board, player_color)
+
+          [move]
+          |> IO.inspect(label: "chosen move")
 
         _, %{game_state: %GameState{board: board}, selection: selection} ->
           board
           |> GameBoard.possible_moves(selection)
-          |> Enum.map(& &1.destination)
+          |> Enum.map(fn %{destination: dest} = move ->
+            eval =
+              board
+              |> GameBoard.move(move)
+              |> ElixirconfChess.AI.eval()
+
+            {dest, eval}
+          end)
+          |> IO.inspect(label: "moves and evals")
+          |> Enum.map(&elem(&1, 0))
       end)
 
     {:noreply, socket}

@@ -355,6 +355,10 @@ defmodule ElixirconfChess.GameBoard do
     end
   end
 
+  def move(board, %Move{source: source, destination: dest}) do
+    move(board, source, dest)
+  end
+
   def move(board, {origin_x, origin_y} = origin, {x, y}) do
     piece = value(board, origin)
     # remove the piece from its old position
