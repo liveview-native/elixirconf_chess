@@ -102,19 +102,15 @@ defmodule ElixirconfChess.GameBoard do
     white_moves = possible_moves(board, :white, true)
     black_moves = possible_moves(board, :black, true)
 
-
     case {white_moves, black_moves} do
       {[], []} ->
         :draw
 
-
       {[], _} ->
         {:checkmate, :white}
 
-
       {_, []} ->
         {:checkmate, :black}
-
 
       {_, _} ->
         :active
@@ -125,7 +121,6 @@ defmodule ElixirconfChess.GameBoard do
     case value(board, position) do
       {^turn, _, _} ->
         true
-
 
       _ ->
         false
@@ -147,20 +142,9 @@ defmodule ElixirconfChess.GameBoard do
             end
           )
 
-        row_match =
-          Enum.reduce(
-            row,
-            nil,
-            fn
-              {x, {^turn, ^piece, _}}, _ -> {x, y}
-              _, acc -> acc
-            end
-          )
-
         case row_match do
           nil ->
             acc
-
 
           value ->
             value
@@ -174,10 +158,8 @@ defmodule ElixirconfChess.GameBoard do
       {^turn, _, _} ->
         false
 
-
       nil ->
         false
-
 
       _ ->
         true
@@ -193,7 +175,6 @@ defmodule ElixirconfChess.GameBoard do
     case value(board, position) do
       nil ->
         {:white, "", nil}
-
 
       {color, type, id} ->
         {color, piece(type), id}

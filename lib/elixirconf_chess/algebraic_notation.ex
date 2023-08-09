@@ -3,21 +3,28 @@ defmodule ElixirconfChess.AlgebraicNotation do
 
   def move_algebra(board, new_board, {x, _} = origin, target) do
     {turn, piece, _} = GameBoard.value(board, origin)
-    capture = case GameBoard.value(board, target) do
-      nil ->
-        ""
-      _ ->
-        case piece do
-          :pawn ->
-            "#{file(x)}x"
-          _ ->
-            "x"
-        end
-    end
+
+    capture =
+      case GameBoard.value(board, target) do
+        nil ->
+          ""
+
+        _ ->
+          case piece do
+            :pawn ->
+              "#{file(x)}x"
+
+            _ ->
+              "x"
+          end
+      end
+
     algebra = "#{piece_algebra(piece)}#{capture}#{position_algebra(target)}"
+
     case GameBoard.game_state(new_board) do
       {:checkmate, _} ->
         "#{algebra}#"
+
       _ ->
         if GameBoard.in_check?(new_board, GameBoard.enemy(turn)) do
           "#{algebra}+"

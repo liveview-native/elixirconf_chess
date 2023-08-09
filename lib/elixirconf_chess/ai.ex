@@ -5,7 +5,6 @@ defmodule ElixirconfChess.AI do
 
   alias ElixirconfChess.GameBoard
 
-
   @piece_layers [
     {:pawn, :white},
     {:rook, :white},
@@ -30,29 +29,39 @@ defmodule ElixirconfChess.AI do
   end
 
   defp minimax(board, current_player, depth, alpha \\ @min_score, beta \\ @max_score)
+
   defp minimax(board, _current_player, 0, _alpha, _beta) do
     eval(board)
   end
 
   defp minimax(board, current_player, depth, alpha, beta) do
     case GameBoard.game_state(board) do
-      {:checkmate, ^current_player} -> 1000
-      {:checkmate, _} -> -1000
-      :draw -> 0
+      {:checkmate, ^current_player} ->
+        1000
+
+      {:checkmate, _} ->
+        -1000
+
+      :draw ->
+        0
+
       _ ->
         # Here we can do some random sampling if we want to approximate MonteCarlo search instead
         moves = GameBoard.possible_moves(board, current_player, true)
 
-        score = if current_player == :max_player do
-          max_value(board, moves, depth, alpha, beta)
-        else
-          min_value(board, moves, depth, alpha, beta)
-        end
+        score =
+          if current_player == :max_player do
+            max_value(board, moves, depth, alpha, beta)
+          else
+            min_value(board, moves, depth, alpha, beta)
+          end
+
         score
     end
   end
 
   defp max_value(board, [], _depth, alpha, _beta), do: eval(board)
+
   defp max_value(board, [move | rest], depth, alpha, beta) do
     # TO-DO: implement the move/2 function
     to_eval_board = GameBoard.move(board, move)
@@ -62,6 +71,7 @@ defmodule ElixirconfChess.AI do
   end
 
   defp min_value(board, [], _depth, _alpha, beta), do: eval(board)
+
   defp min_value(board, [move | rest], depth, alpha, beta) do
     # TO-DO: implement the move/2 function
     to_eval_board = GameBoard.move(board, move)
