@@ -7,8 +7,16 @@ defmodule ElixirconfChessWeb.ChessComponents do
 
   def game_board(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
-    <NamespaceContext id={:game_board}>
-      <Grid modifiers={animation(animation: :default, value: Atom.to_string(@turn)) |> aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain) |> corner_radius(radius: 8)} horizontal-spacing={0} vertical-spacing={0}>
+    <%
+      moves = case @selection do
+        nil ->
+          []
+        selection ->
+          GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
+      end
+    %>
+    <NamespaceContext id={:game_board} modifiers={layout_priority(1)}>
+      <Grid modifiers={aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain) |> corner_radius(radius: 8)} horizontal-spacing={0} vertical-spacing={0}>
         <GridRow :for={y <- GameBoard.y_range}>
           <.tile
             :for={x <- GameBoard.x_range}
@@ -16,7 +24,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
             y={y}
             board={@board}
             selection={@selection}
-            moves={@moves}
+            moves={moves}
             native={@native}
             platform_id={:swiftui}
           />
@@ -34,20 +42,11 @@ defmodule ElixirconfChessWeb.ChessComponents do
           []
 
         selection ->
-          GameBoard.possible_moves(@board, selection)
+          GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
       end %>
     <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden">
       <%= for y <- GameBoard.y_range do %>
-        <.tile
-          :for={x <- GameBoard.x_range()}
-          x={x}
-          y={y}
-          board={@board}
-          selection={@selection}
-          moves={moves}
-          native={@native}
-          platform_id={:web}
-        />
+        <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} native={@native} platform_id={:web} />
       <% end %>
     </div>
     """
@@ -87,20 +86,10 @@ defmodule ElixirconfChessWeb.ChessComponents do
 
   def tile(%{platform_id: :web} = assigns) do
     ~H"""
-    <button
-      style={"background-color: #{tile_color({@x, @y}) |> Colors.web};"}
-      class="aspect-square flex overflow-clip"
-      phx-click="select"
-      phx-value-x={@x}
-      phx-value-y={@y}
-    >
+    <button style={"background-color: #{tile_color({@x, @y}) |> Colors.web};"} class="aspect-square flex overflow-clip" phx-click="select" phx-value-x={@x} phx-value-y={@y}>
       <% {color, image, _} = GameBoard.piece(@board, {@x, @y}) %>
       <div class="relative w-full h-full flex justify-center items-center">
-        <div
-          class="absolute w-full h-full"
-          style={"background-color: #{overlay_color(@selection, @moves, {@x, @y}) |> Colors.web};"}
-        >
-        </div>
+        <div class="absolute w-full h-full" style={"background-color: #{overlay_color(@selection, @moves, {@x, @y}) |> Colors.web};"}></div>
         <p class={"text-5xl text-center z-10 " <> (if color == :white, do: "text-white", else: "text-black")}>
           <%= image %>
         </p>
@@ -154,7 +143,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
 
   def tile_color({x, y}) do
     cond do
-      rem(x, 2) != rem(y, 2) ->
+      rem(x, 2) == rem(y, 2) ->
         :even_background
 
       true ->

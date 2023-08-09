@@ -18,6 +18,8 @@
 		00934D3C2A748C3300A76A26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00934D3B2A748C3300A76A26 /* Assets.xcassets */; };
 		00934D3F2A748C3300A76A26 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00934D3E2A748C3300A76A26 /* Preview Assets.xcassets */; };
 		00934D482A748C4000A76A26 /* LiveViewNative in Frameworks */ = {isa = PBXBuildFile; productRef = 00934D472A748C4000A76A26 /* LiveViewNative */; };
+		00CDF06C2A7C32E4004BF4C5 /* ConnectionErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CDF06B2A7C32E4004BF4C5 /* ConnectionErrorView.swift */; };
+		00CDF06E2A7C3304004BF4C5 /* ChessProgressViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CDF06D2A7C3304004BF4C5 /* ChessProgressViewStyle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +69,9 @@
 		00934D392A748C3100A76A26 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		00934D3B2A748C3300A76A26 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		00934D3E2A748C3300A76A26 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		00CDF06B2A7C32E4004BF4C5 /* ConnectionErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionErrorView.swift; sourceTree = "<group>"; };
+		00CDF06D2A7C3304004BF4C5 /* ChessProgressViewStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessProgressViewStyle.swift; sourceTree = "<group>"; };
+		00CDF06F2A7C450A004BF4C5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,11 +117,14 @@
 		00934CFD2A73187B00A76A26 /* ElixirConfChess */ = {
 			isa = PBXGroup;
 			children = (
+				00CDF06F2A7C450A004BF4C5 /* Info.plist */,
 				00934CFE2A73187B00A76A26 /* ElixirConfChessApp.swift */,
 				00934D002A73187B00A76A26 /* ContentView.swift */,
 				00934D022A73187D00A76A26 /* Assets.xcassets */,
 				00934D042A73187D00A76A26 /* ElixirConfChess.entitlements */,
 				00934D052A73187D00A76A26 /* Preview Content */,
+				00CDF06B2A7C32E4004BF4C5 /* ConnectionErrorView.swift */,
+				00CDF06D2A7C3304004BF4C5 /* ChessProgressViewStyle.swift */,
 			);
 			path = ElixirConfChess;
 			sourceTree = "<group>";
@@ -294,6 +302,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				00934D012A73187B00A76A26 /* ContentView.swift in Sources */,
+				00CDF06C2A7C32E4004BF4C5 /* ConnectionErrorView.swift in Sources */,
+				00CDF06E2A7C3304004BF4C5 /* ChessProgressViewStyle.swift in Sources */,
 				00934CFF2A73187B00A76A26 /* ElixirConfChessApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -444,6 +454,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"ElixirConfChess/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ElixirConfChess/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -481,6 +492,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"ElixirConfChess/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ElixirConfChess/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -642,7 +654,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/liveview-native/liveview-client-swiftui";
 			requirement = {
-				branch = "noderef-foreach-id";
+				branch = "optimize-view-bodies";
 				kind = branch;
 			};
 		};

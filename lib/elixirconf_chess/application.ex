@@ -15,6 +15,7 @@ defmodule ElixirconfChess.Application do
       ElixirconfChessWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: ElixirconfChess.PubSub},
+      ElixirconfChess.GameMaster,
       # Start the Endpoint (http/https)
       ElixirconfChessWeb.Endpoint
       # Start a worker by calling: ElixirconfChess.Worker.start_link(arg)

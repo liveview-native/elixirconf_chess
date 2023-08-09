@@ -2,21 +2,40 @@ defmodule ElixirconfChessWeb.IndexLive do
   use Phoenix.LiveView
   use LiveViewNative.LiveView
 
+  alias ElixirconfChess.GameState
+  alias ElixirconfChess.GameMaster
+
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    ElixirconfChess.PubSub.subscribe_lobby()
+    {:ok, assign(socket, :games, GameMaster.list_games())}
   end
 
   def render(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
-    <VStack modifiers={navigation_title(title: "Chess") |> button_style(style: :bordered_prominent) |> padding([])}>
-      <.play_button type="online" color={:odd_background} foreground={:white} image="network">
-        Online Match
-      </.play_button>
-      <.play_button type="nx" color={:even_background} foreground={:black} image="point.3.filled.connected.trianglepath.dotted">
-        Nx Match
-      </.play_button>
-      <Spacer />
-    </VStack>
+    <OpenGameListener />
+    <ScrollView modifiers={navigation_title(title: "Lobby") |> toolbar(content: :toolbar)}>
+      <Group template={:toolbar}>
+        <ToolbarItem>
+          <Button phx-click="create">
+            <Label system-image="plus.square.on.square">
+              Create Game
+            </Label>
+          </Button>
+        </ToolbarItem>
+      </Group>
+      <LazyVStack modifiers={button_style(style: :bordered_prominent) |> padding([])}>
+        <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
+          <.play_button phx-click="join" phx-value-id={game_id} color={background_color(index, :swiftui)} foreground={button_foreground(index, :swiftui)} image="play.square.fill">
+            <VStack alignment="leading" modifiers={frame(max_width: 99999999, alignment: :leading)}>
+              <Text>Join Game</Text>
+              <Text modifiers={font(font: {:system, :subheadline}) |> foreground_style({:hierarchical, :secondary})}>
+                <%= String.slice(game_id, 0..3) |> String.upcase() %>
+              </Text>
+            </VStack>
+          </.play_button>
+        <% end %>
+      </LazyVStack>
+    </ScrollView>
     """
   end
 
@@ -24,21 +43,13 @@ defmodule ElixirconfChessWeb.IndexLive do
     ~H"""
     <div class="w-full flex flex-col items-center gap-2">
       <p class="text-5xl font-bold">Chess</p>
-      <button
-        phx-click="play"
-        phx-value-type="online"
-        style={"background-color: #{ElixirconfChessWeb.Colors.web(:odd_background)};"}
-        class="p-2 font-bold text-white rounded"
-      >
-        Online Match
-      </button>
-      <button
-        phx-click="play"
-        phx-value-type="nx"
-        style={"background-color: #{ElixirconfChessWeb.Colors.web(:even_background)};"}
-        class="p-2 font-bold rounded"
-      >
-        Nx Match
+      <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
+        <button phx-click="join" phx-value-id={game_id} style={"background-color: #{background_color(index, :web)};"} class="p-2 font-bold text-white rounded">
+          Join Game
+        </button>
+      <% end %>
+      <button phx-click="create" style={"background-color: #{background_color(map_size(@games), :web)};"} class="p-2 font-bold rounded">
+        Create Game
       </button>
     </div>
     """
@@ -48,23 +59,42 @@ defmodule ElixirconfChessWeb.IndexLive do
   attr :color, :any
   attr :foreground, :any
   attr :image, :string
+  attr :rest, :global
   slot :inner_block
 
   def play_button(assigns) do
     ~SWIFTUI"""
     <Button
-        phx-click="play"
-        phx-value-type={@type}
-        modifiers={tint(color: ElixirconfChessWeb.Colors.swiftui(@color) |> elem(1)) |> foreground_style({:color, @foreground})}
+        {@rest}
+        modifiers={tint(color: @color |> elem(1)) |> foreground_style({:color, @foreground})}
       >
-        <Label system-image={@image} modifiers={frame(max_width: 99999) |> padding(8) |> font(font: {:system, :headline})}>
+        <Label system-image={@image} modifiers={frame(max_width: 99999) |> padding(8) |> font(font: {:system, :headline}) |> image_scale(scale: :large)}>
           <%= render_slot(@inner_block) %>
         </Label>
     </Button>
     """
   end
 
-  def handle_event("play", %{"type" => type}, socket) do
-    {:noreply, push_navigate(socket, to: "/lobby?type=#{type}", replace: false)}
+  def handle_event("join", %{"id" => id}, socket) do
+    {:noreply, push_navigate(socket, to: "/game/#{id}", replace: false)}
+  end
+
+  def handle_event("create", _, socket) do
+    game_id = GameMaster.create_game()
+    {:noreply, push_navigate(socket, to: "/game/#{game_id}", replace: false)}
+  end
+
+  def background_color(index, platform) when rem(index, 2) == 0, do: ElixirconfChessWeb.Colors.evaluate(:odd_background, platform)
+  def background_color(_index, platform), do: ElixirconfChessWeb.Colors.evaluate(:even_background, platform)
+
+  def button_foreground(index, _platform) when rem(index, 2) == 0, do: :white
+  def button_foreground(_index, _platform), do: :black
+
+  def handle_info({:game_update, id, %GameState{state: :active} = game}, socket) do
+    {:noreply, assign(socket, :games, Map.put(socket.assigns.games, id, game))}
+  end
+
+  def handle_info({:game_update, id, %GameState{}}, socket) do
+    {:noreply, assign(socket, :games, Map.delete(socket.assigns.games, id))}
   end
 end
