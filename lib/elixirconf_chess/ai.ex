@@ -28,21 +28,21 @@ defmodule ElixirconfChess.AI do
   def choose_move(board, current_player) do
     input = board_to_input(board, current_player)
 
-    %Move{} =
-      move =
+    {probabilities, moves_idx} =
       Nx.Serving.batched_run(ChessAI.Serving, Nx.Batch.stack([input]), &Nx.backend_transfer/1)
       |> IO.inspect(label: "batched_run result")
       |> Nx.flatten()
       |> Nx.top_k(k: 5)
       |> IO.inspect(label: "topk moves")
-      |> elem(1)
-      |> Nx.to_list()
-      |> Enum.random()
-      |> IO.inspect(label: "chosen idx")
-      |> index_to_move()
-      |> IO.inspect(label: "chosen move")
 
-    move
+    Enum.zip_with(Nx.to_list(probabilities), Nx.to_list(moves_idx), &{&1, &2})
+    |> Enum.filter(&(elem(&1, 0) > 0))
+    |> IO.inspect(label: "move pool")
+    |> Enum.random()
+    |> IO.inspect(label: "chosen idx")
+    |> elem(1)
+    |> index_to_move()
+    |> IO.inspect(label: "chosen move")
   end
 
   def serving do
@@ -164,8 +164,9 @@ defmodule ElixirconfChess.AI do
     moves_idx =
       board
       |> GameBoard.possible_moves(current_player, true)
-      |> Enum.map(fn %{source: {source_x, source_y}, destination: {dest_x, dest_y}} ->
-        move = Move.new({source_x, 7 - source_y}, {dest_x, 7 - dest_y})
+      |> Enum.map(fn %{source: {source_col, source_row}, destination: {dest_col, dest_row}} ->
+        move = Move.new({source_col, 7 - source_row}, {dest_col, 7 - dest_row})
+        IO.inspect(move, label: "move")
         move_to_index(move)
       end)
 
@@ -226,7 +227,7 @@ defmodule ElixirconfChess.AI do
     end
   end
 
-  defp moves_mask(moves_idx) do
+  def moves_mask(moves_idx) do
     moves_idx_t = Nx.tensor(moves_idx) |> Nx.new_axis(1)
 
     base = Nx.broadcast(Nx.u8(0), {4096})
@@ -234,8 +235,8 @@ defmodule ElixirconfChess.AI do
     Nx.indexed_put(base, moves_idx_t, Nx.broadcast(Nx.u8(1), {Nx.size(moves_idx_t)}))
   end
 
-  defp move_to_index(move)
-  defp index_to_move(index)
+  def move_to_index(move)
+  def index_to_move(index)
 
   for start_sq <- 0..63, dest_sq <- 0..63 do
     start_move = {rem(start_sq, 8), div(start_sq, 8)}
@@ -243,7 +244,7 @@ defmodule ElixirconfChess.AI do
 
     sq_idx = start_sq * 64 + dest_sq
 
-    defp move_to_index(%Move{source: unquote(start_move), destination: unquote(dest_move)}), do: unquote(sq_idx)
-    defp index_to_move(unquote(sq_idx)), do: %Move{source: unquote(start_move), destination: unquote(dest_move)}
+    def move_to_index(%Move{source: unquote(start_move), destination: unquote(dest_move)}), do: unquote(sq_idx)
+    def index_to_move(unquote(sq_idx)), do: %Move{source: unquote(start_move), destination: unquote(dest_move)}
   end
 end
