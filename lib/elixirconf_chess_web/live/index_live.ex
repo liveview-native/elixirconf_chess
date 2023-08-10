@@ -90,7 +90,7 @@ defmodule ElixirconfChessWeb.IndexLive do
   def button_foreground(index, _platform) when rem(index, 2) == 0, do: :white
   def button_foreground(_index, _platform), do: :black
 
-  def handle_info({:game_update, id, %GameState{state: :active} = game}, socket) do
+  def handle_info({:game_update, id, %GameState{state: {:active, _}} = game}, socket) do
     {:noreply, assign(socket, :games, Map.put(socket.assigns.games, id, game))}
   end
 

@@ -44,7 +44,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
         selection ->
           GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
       end %>
-    <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden">
+    <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden" style="font-family: Arial;">
       <%= for y <- GameBoard.y_range do %>
         <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} native={@native} platform_id={:web} />
       <% end %>

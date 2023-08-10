@@ -6,6 +6,7 @@ defmodule ElixirconfChessWeb.ChessLive do
   alias ElixirconfChess.PubSub
   alias ElixirconfChess.GameBoard
   alias ElixirconfChess.GameState
+  alias ElixirconfChess.AlgebraicNotation
 
   alias ElixirconfChess.Game
 
@@ -110,7 +111,7 @@ defmodule ElixirconfChessWeb.ChessLive do
             id={"move-#{length(@game_state.move_history) - index}"}
             modifiers={padding(:horizontal, 4)}
           >
-            <%= move %>
+            <%= AlgebraicNotation.move_algebra(move) %>
           </Text>
         </HStack>
       </ScrollView>
@@ -132,18 +133,28 @@ defmodule ElixirconfChessWeb.ChessLive do
         </button>
       <% end %>
       <%= case @game_state.state do %>
-        <% :active -> %>
-          Turn:
-          <p class="text-4xl font-bold"><%= @game_state.turn |> Atom.to_string() |> String.capitalize() %><span :if={@game_state.turn != @player_color}> (Not you)</span></p>
         <% :draw -> %>
           Draw
         <% {:checkmate, :white} -> %>
           Checkmate - Black Wins
         <% {:checkmate, :black} -> %>
           Checkmate - White Wins
+        <% _ -> %>
+          Turn:
+            <p class="text-4xl font-bold"><%= @game_state.turn |> Atom.to_string() |> String.capitalize() %><span :if={@game_state.turn != @player_color}> (Not you)</span></p>
       <% end %>
 
       <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:web} native={@native} />
+
+      <div class="flex flex-row overflow-x-scroll w-full max-w-2xl py-4">
+        <p
+          :for={{move, index} <- Enum.with_index(@game_state.move_history)}
+          id={"move-#{length(@game_state.move_history) - index}"}
+          class="px-4"
+        >
+          <%= AlgebraicNotation.move_algebra(move) %>
+        </p>
+      </div>
     </div>
     <pre :if={!@loading} hidden><%= inspect(@game_state, pretty: true) %></pre>
     """
@@ -189,7 +200,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
   def select(socket, new_position) do
     case socket.assigns.game_state.state do
-      :active ->
+      {:active, _} ->
         if new_position == socket.assigns.selection do
           assign(socket, selection: nil)
         else

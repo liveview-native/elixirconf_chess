@@ -113,7 +113,16 @@ defmodule ElixirconfChess.GameBoard do
         {:checkmate, :black}
 
       {_, _} ->
-        :active
+        white_check = in_check?(board, :white)
+        black_check = in_check?(board, :black)
+        case {white_check, black_check} do
+          {true, false} ->
+            {:active, {:check, :white}}
+          {false, true} ->
+            {:active, {:check, :black}}
+          {_, _} ->
+            {:active, nil}
+        end
     end
   end
 
@@ -247,7 +256,7 @@ defmodule ElixirconfChess.GameBoard do
         captures
       end
 
-    Enum.map(moves, &Move.new(source, &1))
+    Enum.map(moves, &Move.new(board, source, &1))
   end
 
   defp do_possible_moves(board, {x, y} = source, {turn, :rook, _}) do
@@ -257,7 +266,7 @@ defmodule ElixirconfChess.GameBoard do
       directional_moves([], turn, board, {x, y - 1}, {0, -1}),
       directional_moves([], turn, board, {x, y + 1}, {0, 1})
     ])
-    |> Enum.map(&Move.new(source, &1))
+    |> Enum.map(&Move.new(board, source, &1))
   end
 
   defp do_possible_moves(board, {x, y} = source, {turn, :knight, _}) do
@@ -274,7 +283,7 @@ defmodule ElixirconfChess.GameBoard do
 
     moves = for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
 
-    Enum.map(moves, &Move.new(source, &1))
+    Enum.map(moves, &Move.new(board, source, &1))
   end
 
   defp do_possible_moves(board, {x, y} = source, {turn, :bishop, _}) do
@@ -284,7 +293,7 @@ defmodule ElixirconfChess.GameBoard do
       directional_moves([], turn, board, {x - 1, y + 1}, {-1, 1}),
       directional_moves([], turn, board, {x + 1, y + 1}, {1, 1})
     ])
-    |> Enum.map(&Move.new(source, &1))
+    |> Enum.map(&Move.new(board, source, &1))
   end
 
   defp do_possible_moves(board, {x, y} = source, {turn, :queen, _}) do
@@ -298,7 +307,7 @@ defmodule ElixirconfChess.GameBoard do
       directional_moves([], turn, board, {x - 1, y + 1}, {-1, 1}),
       directional_moves([], turn, board, {x + 1, y + 1}, {1, 1})
     ])
-    |> Enum.map(&Move.new(source, &1))
+    |> Enum.map(&Move.new(board, source, &1))
   end
 
   defp do_possible_moves(board, {x, y} = source, {turn, :king, _}) do
@@ -315,7 +324,7 @@ defmodule ElixirconfChess.GameBoard do
 
     moves = for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
 
-    Enum.map(moves, &Move.new(source, &1))
+    Enum.map(moves, &Move.new(board, source, &1))
   end
 
   defp row_moves(board, y, row, turn, discard_checks) do
