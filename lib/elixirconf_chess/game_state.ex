@@ -4,6 +4,8 @@ defmodule ElixirconfChess.GameState do
             spectators: [],
             white: nil,
             black: nil,
+            white_is_ai: false,
+            black_is_ai: false,
             state: :active,
             move_history: []
 

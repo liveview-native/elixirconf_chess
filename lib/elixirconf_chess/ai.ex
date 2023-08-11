@@ -42,6 +42,9 @@ defmodule ElixirconfChess.AI do
     |> IO.inspect(label: "chosen idx")
     |> elem(1)
     |> index_to_move()
+    |> then(fn %Move{source: {x, y}, destination: {dest_x, dest_y}} ->
+      %Move{source: {x, 7 - y}, destination: {dest_x, 7 - dest_y}}
+    end)
     |> IO.inspect(label: "chosen move")
   end
 

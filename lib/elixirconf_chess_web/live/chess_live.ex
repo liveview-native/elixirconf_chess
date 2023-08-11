@@ -9,7 +9,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
   alias ElixirconfChess.Game
 
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(%{"id" => id} = params, _session, socket) do
     cond do
       !Game.alive?(id) ->
         {:ok, push_navigate(socket, to: "/", replace: false)}
@@ -18,7 +18,7 @@ defmodule ElixirconfChessWeb.ChessLive do
         {:ok, assign(socket, :loading, true)}
 
       :else ->
-        {player_color, game_state} = Game.join(id)
+        {player_color, game_state} = Game.join(id, params["is_ai"] == "true")
 
         PubSub.subscribe_game(id)
 
@@ -136,16 +136,12 @@ defmodule ElixirconfChessWeb.ChessLive do
       |> select({String.to_integer(x), String.to_integer(y)})
       |> update(:moves, fn
         _, %{selection: nil, game_state: %GameState{board: board}, player_color: player_color} ->
-          # move = ElixirconfChess.AI.choose_next_move(board, player_color)
-
           []
 
-        # |> IO.inspect(label: "chosen move")
-
         _, %{game_state: %GameState{board: board, turn: turn}, selection: selection} ->
-          move = ElixirconfChess.AI.choose_move(board, turn)
-
-          board = GameBoard.move(board, move)
+          board
+          |> GameBoard.possible_moves(selection)
+          |> Enum.map(& &1.destination)
       end)
 
     {:noreply, socket}
