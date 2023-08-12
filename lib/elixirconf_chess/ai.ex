@@ -26,26 +26,47 @@ defmodule ElixirconfChess.AI do
   @max_score 20_000
 
   def choose_move(board, current_player) do
-    input = board_to_input(board, current_player)
+    {input, valid_moves_idx} = board_to_input(board, current_player)
+
+    k = 5
 
     {probabilities, moves_idx} =
       Nx.Serving.batched_run(ChessAI.Serving, Nx.Batch.stack([input]), &Nx.backend_transfer/1)
       |> IO.inspect(label: "batched_run result")
       |> Nx.flatten()
-      |> Nx.top_k(k: 5)
+      |> Nx.top_k(k: k)
       |> IO.inspect(label: "topk moves")
 
-    Enum.zip_with(Nx.to_list(probabilities), Nx.to_list(moves_idx), &{&1, &2})
-    |> Enum.filter(&(elem(&1, 0) > 0))
-    |> IO.inspect(label: "move pool")
+    move_pool =
+      Enum.zip_with(Nx.to_list(probabilities), Nx.to_list(moves_idx), &{&1, &2})
+      |> Enum.filter(&(elem(&1, 0) > 0))
+      |> IO.inspect(label: "predicted move pool")
+      |> Enum.map(&elem(&1, 1))
+
+    extra_moves_pool = valid_moves_idx -- move_pool
+
+    topk = Enum.sort_by(extra_moves_pool, &eval_move(board, &1, current_player), :desc)
+    topk = Enum.take(topk, k - length(move_pool))
+    samples = move_pool ++ topk
+
+    samples
     |> Enum.random()
     |> IO.inspect(label: "chosen idx")
-    |> elem(1)
     |> index_to_move()
     |> then(fn %Move{source: {x, y}, destination: {dest_x, dest_y}} ->
       %Move{source: {x, 7 - y}, destination: {dest_x, 7 - dest_y}}
     end)
     |> IO.inspect(label: "chosen move")
+  end
+
+  defp eval_move(board, move_idx, current_player) do
+    new_board = GameBoard.move(board, index_to_move(move_idx))
+    {%{"board" => board}, _valid_moves_idx} = board_to_input(board, current_player)
+
+    Nx.Serving.batched_run(ChessAI.EvaluatorServing, Nx.Batch.stack([%{"board" => board}]), &Nx.backend_transfer/1)
+    |> IO.inspect(label: "eval")
+    |> Nx.reshape({})
+    |> Nx.to_number()
   end
 
   def serving do
@@ -134,6 +155,86 @@ defmodule ElixirconfChess.AI do
       |> Axon.softmax()
   end
 
+  def evaluator_serving do
+    # Configuration
+    batch_size = 4
+    defn_options = [compiler: EXLA]
+
+    Nx.Serving.new(
+      # This function runs on the serving startup
+      fn ->
+        # Build the Axon model and load params (usually from file)
+        model = evaluator_model()
+        filename = Path.join(to_string(:code.priv_dir(:elixirconf_chess)), "evaluator_weights.nx")
+        params = filename |> File.read!() |> Nx.deserialize()
+
+        # Build the prediction defn function
+        {_init_fun, predict_fun} = Axon.build(model)
+
+        inputs_template = %{
+          "board" => Nx.template({batch_size, 8, 8, 12}, :u8)
+        }
+
+        template_args = [Nx.to_template(params), inputs_template]
+
+        # Compile the prediction function upfront for the configured batch_size
+        predict_fun = Nx.Defn.compile(predict_fun, template_args, defn_options)
+
+        # The returned function is called for every accumulated batch
+        fn inputs ->
+          inputs = Nx.Batch.pad(inputs, batch_size - inputs.size)
+          predict_fun.(params, inputs)
+        end
+      end,
+      batch_size: batch_size
+    )
+  end
+
+  defp evaluator_model do
+    board_input = Axon.input("board", shape: {nil, 8, 8, 12})
+
+    conv_batch_norm = fn layer, num_filters, kernel_size, padding, activation, kernel_dilation ->
+      layer
+      |> Axon.conv(num_filters,
+        kernel_size: kernel_size,
+        padding: padding,
+        activation: :linear,
+        kernel_dilation: kernel_dilation
+      )
+      |> Axon.batch_norm()
+      |> Axon.activation(activation)
+    end
+
+    res_net = fn input, num_filters, kernel_size ->
+      first =
+        Axon.conv(input, num_filters, kernel_size: kernel_size, padding: :same, activation: :relu)
+
+      first
+      |> Axon.conv(num_filters, kernel_size: kernel_size, padding: :same, activation: :linear)
+      |> Axon.add(first)
+      |> Axon.relu()
+      |> Axon.batch_norm()
+    end
+
+    two_resnet = fn kernel_size ->
+      board_input
+      |> res_net.(32, kernel_size)
+      |> res_net.(32, kernel_size)
+    end
+
+    Enum.map([3, 7], two_resnet)
+    |> Axon.concatenate(axis: -1)
+    |> res_net.(64, 3)
+    |> res_net.(64, 3)
+    |> Axon.conv(256, kernel_size: 8, feature_group_size: 64, activation: :linear)
+    |> Axon.batch_norm()
+    |> Axon.relu()
+    |> Axon.flatten()
+    |> Axon.dense(256, activation: :relu)
+    |> Axon.dense(256, activation: :relu)
+    |> Axon.dense(1, activation: :tanh)
+  end
+
   def board_to_input(board, current_player) do
     pieces_by_kind =
       board
@@ -173,7 +274,10 @@ defmodule ElixirconfChess.AI do
         move_to_index(move)
       end)
 
-    %{"board" => input_layers, "valid_moves_mask" => moves_mask(moves_idx)}
+    {
+      %{"board" => input_layers, "valid_moves_mask" => moves_mask(moves_idx)},
+      moves_idx
+    }
   end
 
   defp all_pieces(board) do
