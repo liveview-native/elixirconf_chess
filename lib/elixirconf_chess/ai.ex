@@ -150,7 +150,7 @@ defmodule ElixirconfChess.AI do
 
         {pieces, layer_index}
       end)
-      |> Enum.reject(fn {pieces, _} -> pieces == [] end)
+      |> Enum.reject(fn {pieces, _} -> pieces == [] or is_nil(pieces) end)
       |> Enum.reduce(input_layers, fn {pieces, layer_index}, acc ->
         indices =
           pieces
