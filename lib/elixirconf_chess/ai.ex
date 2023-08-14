@@ -94,24 +94,7 @@ defmodule ElixirconfChess.AI do
       |> Enum.filter(&(elem(&1, 0) > 0))
       |> Enum.map(&index_to_move(elem(&1, 1)))
 
-    # extra_moves_pool = valid_moves_idx -- move_pool
-
-    # topk = Enum.sort_by(extra_moves_pool, &eval_move(board, index_to_move(&1)), :desc)
-    # topk = Enum.take(topk, k - length(move_pool))
-
-    # move_pool ++ topk
     move_pool
-  end
-
-  defp eval_move(board, move) do
-    IO.inspect({board, move})
-
-    eval =
-      board
-      |> GameBoard.move(move)
-      |> eval_board()
-
-    {eval, move}
   end
 
   defp eval_board(board) do
