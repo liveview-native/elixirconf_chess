@@ -41,21 +41,17 @@ defmodule ElixirconfChess.Game do
   end
 
   def handle_info(:ai_tick, state) do
-    # IO.inspect(state, label: "ai_tick state")
-
-    move =
+    {_eval, move} =
       case state.game_state do
-        %{turn: :black, black_is_ai: true} ->
+        %{turn: :black, black_is_ai: true, state: :active} ->
           ElixirconfChess.AI.choose_move(state.game_state.board, :black)
 
-        %{turn: :white, white_is_ai: true} ->
+        %{turn: :white, white_is_ai: true, state: :active} ->
           ElixirconfChess.AI.choose_move(state.game_state.board, :white)
 
         _ ->
-          nil
+          {0, nil}
       end
-
-    IO.inspect({move, state.game_state.turn}, label: "move, turn")
 
     state =
       case move do
@@ -68,7 +64,10 @@ defmodule ElixirconfChess.Game do
           state
       end
 
-    ai_tick()
+    if state.game_state.state == :active do
+      ai_tick()
+    end
+
     {:noreply, state}
   end
 
@@ -140,5 +139,5 @@ defmodule ElixirconfChess.Game do
     end
   end
 
-  defp ai_tick, do: Process.send_after(self(), :ai_tick, 1_000)
+  defp ai_tick, do: Process.send_after(self(), :ai_tick, 500)
 end

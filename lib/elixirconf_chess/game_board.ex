@@ -331,6 +331,11 @@ defmodule ElixirconfChess.GameBoard do
               do_possible_moves(board, {x, y}, value)
             end
 
+          moves =
+            Enum.reject(moves, fn %Move{destination: {dest_x, dest_y}} ->
+              dest_x < 0 or dest_x > 7 or dest_y < 0 or dest_y > 7
+            end)
+
           moves ++ acc
 
         _, acc ->
