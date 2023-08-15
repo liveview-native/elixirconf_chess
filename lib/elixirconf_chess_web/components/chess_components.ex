@@ -12,7 +12,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
         nil ->
           []
         selection ->
-          GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
+          GameBoard.possible_moves(@game_state, selection) |> Enum.map(& &1.destination)
       end
     %>
     <NamespaceContext id={:game_board} modifiers={layout_priority(1)}>
@@ -42,7 +42,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
           []
 
         selection ->
-          GameBoard.possible_moves(@board, selection) |> Enum.map(& &1.destination)
+          GameBoard.possible_moves(@game_state, selection) |> Enum.map(& &1.destination)
       end %>
     <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden" style="font-family: Arial;">
       <%= for y <- GameBoard.y_range do %>
@@ -115,7 +115,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
           |> foreground_style({:color, @color})
         }
     >
-      <RoundedRectangle template={:check_warning} corner-radius={8} modifiers={stroke_border(content: {:color, :red}, style: [line_width: (if GameBoard.in_check?(@board, @color), do: 4, else: 0)])} />
+      <RoundedRectangle template={:check_warning} corner-radius={8} modifiers={stroke_border(content: {:color, :red}, style: [line_width: (if GameBoard.in_check?(@game_state, @color), do: 4, else: 0)])} />
 
       <Image system-name="person.crop.circle.fill" modifiers={font(font: {:system, :large_title})} />
       <VStack alignment="leading" modifiers={padding(:trailing, 8)}>

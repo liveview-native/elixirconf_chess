@@ -10,7 +10,7 @@ defmodule ElixirconfChess.GameBoard.Move do
     capture: GameBoard.value(board, destination),
     state: GameBoard.game_state(GameBoard.move(board, source, destination))
   }
-  def new(board, source, destination, false), do: %__MODULE__{
+  def new(_board, source, destination, false), do: %__MODULE__{
     source: source,
     destination: destination,
     value: nil,
