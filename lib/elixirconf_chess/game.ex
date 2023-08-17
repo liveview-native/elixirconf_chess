@@ -118,9 +118,9 @@ defmodule ElixirconfChess.Game do
   end
 
   defp update_game_with_move(state, selection, new_position) do
-    board = GameBoard.move(state.game_state.board, selection, new_position)
-    game_state_status = GameBoard.game_state(board)
-    move_history = [GameBoard.Move.new(state.game_state.board, selection, new_position, true) | state.game_state.move_history]
+    board = GameBoard.move(state.game_state, selection, new_position)
+    game_state_status = GameBoard.game_state(state.game_state)
+    move_history = [GameBoard.Move.new(state.game_state, selection, new_position, true) | state.game_state.move_history]
     game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
     state = %{state | game_state: game_state}
   end

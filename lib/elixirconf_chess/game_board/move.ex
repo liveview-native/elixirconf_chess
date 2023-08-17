@@ -2,15 +2,15 @@ defmodule ElixirconfChess.GameBoard.Move do
   alias ElixirconfChess.GameBoard
   defstruct [:source, :destination, :value, :capture, :state]
 
-  def new(board, source, destination), do: new(board, source, destination, false)
-  def new(board, source, destination, true), do: %__MODULE__{
+  def new(state, source, destination), do: new(state, source, destination, false)
+  def new(state, source, destination, true), do: %__MODULE__{
     source: source,
     destination: destination,
-    value: GameBoard.value(board, source),
-    capture: GameBoard.value(board, destination),
-    state: GameBoard.game_state(GameBoard.move(board, source, destination))
+    value: GameBoard.value(state.board, source),
+    capture: GameBoard.value(state.board, destination),
+    state: GameBoard.game_state(%{ state | board: GameBoard.move(state, source, destination) })
   }
-  def new(_board, source, destination, false), do: %__MODULE__{
+  def new(_state, source, destination, false), do: %__MODULE__{
     source: source,
     destination: destination,
     value: nil,
