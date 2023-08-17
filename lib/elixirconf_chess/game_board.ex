@@ -110,7 +110,7 @@ defmodule ElixirconfChess.GameBoard do
   }
 
   # def start_board, do: @near_checkmate_board
-  def start_board, do: @en_passant_board
+  def start_board, do: @start_board
 
   def x_range, do: 0..7
   def y_range, do: 0..7
