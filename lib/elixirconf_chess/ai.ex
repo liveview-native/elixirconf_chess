@@ -21,11 +21,11 @@ defmodule ElixirconfChess.AI do
     {:king, :black}
   ]
 
-  @minimax_depth 4
-  @top_k_moves 3
+  @minimax_depth 3
+  @top_k_moves 5
 
   def choose_move(board, current_player, depth \\ @minimax_depth, k \\ @top_k_moves) do
-    {eval, %Move{source: {sx, sy}, destination: {dx, dy}} = move} =
+    {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} =
       minimax(board, depth, -100, 100, current_player == :white, k)
 
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}}
@@ -80,21 +80,22 @@ defmodule ElixirconfChess.AI do
     current_player = if current_player, do: :white, else: :black
     {input, valid_moves_idx} = board_to_input(board, current_player)
 
-    {probabilities, moves_idx} =
-      Nx.Serving.batched_run(ChessAI.Serving, Nx.Batch.stack([Map.take(input, ["board"])]), &Nx.backend_transfer/1)
-      |> Nx.flatten()
-      |> Nx.multiply(input["valid_moves_mask"])
-      |> then(fn t ->
-        Nx.divide(t, Nx.add(Nx.sum(t), 1.0e-7))
-      end)
-      |> Nx.top_k(k: k)
+    if valid_moves_idx == [] do
+      []
+    else
+      {probabilities, moves_idx} =
+        Nx.Serving.batched_run(ChessAI.Serving, Nx.Batch.stack([Map.take(input, ["board"])]), &Nx.backend_transfer/1)
+        |> Nx.flatten()
+        |> Nx.multiply(input["valid_moves_mask"])
+        |> then(fn t ->
+          Nx.divide(t, Nx.add(Nx.sum(t), 1.0e-7))
+        end)
+        |> Nx.top_k(k: k)
 
-    move_pool =
       Enum.zip_with(Nx.to_list(probabilities), Nx.to_list(moves_idx), &{&1, &2})
       |> Enum.filter(&(elem(&1, 0) > 0))
       |> Enum.map(&index_to_move(elem(&1, 1)))
-
-    move_pool
+    end
   end
 
   defp eval_board(board) do
@@ -210,7 +211,7 @@ defmodule ElixirconfChess.AI do
       |> Enum.reduce(input_layers, fn {pieces, layer_index}, acc ->
         indices =
           pieces
-          |> Enum.map(fn %{row: row, col: col} = piece ->
+          |> Enum.map(fn %{row: row, col: col} ->
             [row, col, layer_index]
           end)
           |> Nx.tensor()
@@ -245,6 +246,8 @@ defmodule ElixirconfChess.AI do
       end) ++ acc
     end)
   end
+
+  def moves_mask([]), do: nil
 
   def moves_mask(moves_idx) do
     moves_idx_t = Nx.tensor(moves_idx) |> Nx.new_axis(1)

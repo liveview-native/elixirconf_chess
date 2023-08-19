@@ -78,14 +78,20 @@ defmodule ElixirconfChess.Game do
   def handle_call({:join, is_ai}, {from, _}, state) do
     game_state = clear_disconnected_players(state.game_state)
 
-    {new_player_color, game_state} =
-      case game_state do
-        %GameState{white: nil} -> {:white, %GameState{state.game_state | white: from, white_is_ai: is_ai}}
-        %GameState{black: nil} -> {:black, %GameState{state.game_state | black: from, black_is_ai: is_ai}}
-        _ -> {:spectator, %GameState{state.game_state | spectators: [from | state.game_state.spectators]}}
+    pid =
+      if is_ai do
+        loop = fn f -> f.(f) end
+        spawn_link(fn -> loop.(loop) end)
+      else
+        from
       end
 
-    IO.inspect(game_state, label: "state after join")
+    {new_player_color, game_state} =
+      case game_state do
+        %GameState{white: nil} -> {:white, %GameState{state.game_state | white: pid, white_is_ai: is_ai}}
+        %GameState{black: nil} -> {:black, %GameState{state.game_state | black: pid, black_is_ai: is_ai}}
+        _ -> {:spectator, %GameState{state.game_state | spectators: [from | state.game_state.spectators]}}
+      end
 
     Logger.info("Player #{inspect(self())} joined as #{new_player_color}")
 
@@ -139,5 +145,5 @@ defmodule ElixirconfChess.Game do
     end
   end
 
-  defp ai_tick, do: Process.send_after(self(), :ai_tick, 500)
+  defp ai_tick, do: Process.send_after(self(), :ai_tick, 200)
 end

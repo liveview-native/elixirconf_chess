@@ -47,9 +47,6 @@ defmodule ElixirconfChessWeb.IndexLive do
         <button phx-click="join" phx-value-id={game_id} phx-value-ai={:player} style={"background-color: #{background_color(index, :web)};"} class="p-2 font-bold text-white rounded">
           Join Game
         </button>
-        <button phx-click="join" phx-value-id={game_id} phx-value-ai={:ai} style={"background-color: #{background_color(index, :web)};"} class="p-2 font-bold text-white rounded">
-          Join Game as AI
-        </button>
       <% end %>
       <button phx-click="create" style={"background-color: #{background_color(map_size(@games), :web)};"} class="p-2 font-bold rounded">
         Create Game
@@ -78,9 +75,8 @@ defmodule ElixirconfChessWeb.IndexLive do
     """
   end
 
-  def handle_event("join", %{"id" => id, "ai" => ai}, socket) do
-    is_ai = ai == "ai"
-    {:noreply, push_navigate(socket, to: "/game/#{id}?is_ai=#{is_ai}", replace: false)}
+  def handle_event("join", %{"id" => id}, socket) do
+    {:noreply, push_navigate(socket, to: "/game/#{id}", replace: false)}
   end
 
   def handle_event("create", _, socket) do
