@@ -86,6 +86,14 @@ defmodule ElixirconfChessWeb.ChessLive do
         <%= if @player_color == :white, do: "Opponent", else: "You" %>
       </.player_chip>
 
+      <%= if @can_add_ai_opponent do %>
+        <Button phx-click="create">
+          <Label system-image="play.desktopcomputer">
+            Play against Nx
+          </Label>
+        </Button>
+      <% end %>
+
       <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
 
       <.player_chip color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>

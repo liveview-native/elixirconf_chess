@@ -21,14 +21,14 @@ defmodule ElixirconfChess.AI do
     {:king, :black}
   ]
 
-  @minimax_depth 3
-  @top_k_moves 5
+  @minimax_depth 4
+  @top_k_moves 2
 
   def choose_move(board, current_player, depth \\ @minimax_depth, k \\ @top_k_moves) do
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} =
       minimax(board, depth, -100, 100, current_player == :white, k)
 
-    {eval, %Move{source: {sx, sy}, destination: {dx, dy}}}
+    {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} |> IO.inspect(label: "chosen move")
   end
 
   defp minimax(board, 0, _, _, is_max_player, _) do
@@ -39,6 +39,13 @@ defmodule ElixirconfChess.AI do
   defp minimax(board, depth, alpha, beta, is_max_player, k) do
     moves = get_moves(board, k, is_max_player)
     best_move = nil
+
+    depth =
+      case moves do
+        [] -> 1
+        [_] -> 1
+        _ -> depth
+      end
 
     eval_fn =
       if is_max_player do
@@ -98,6 +105,13 @@ defmodule ElixirconfChess.AI do
       Enum.zip_with(Nx.to_list(probabilities), Nx.to_list(moves_idx), &{&1, &2})
       |> Enum.filter(&(elem(&1, 0) > 0))
       |> Enum.map(&index_to_move(elem(&1, 1)))
+      |> tap(fn moves ->
+        moves
+        |> Enum.map(fn move ->
+          ElixirconfChess.AlgebraicNotation.move_algebra(board, GameBoard.move(board, move), move.source, move.destination)
+        end)
+        |> IO.inspect()
+      end)
     end
   end
 
@@ -114,7 +128,10 @@ defmodule ElixirconfChess.AI do
 
       :active ->
         {%{"board" => board}, _} = board_to_input(board, current_player)
+
         Nx.Serving.batched_run(ChessAI.EvaluatorServing, Nx.Batch.stack([%{"board" => board}]), &Nx.backend_transfer/1)
+        |> Nx.reshape({})
+        |> Nx.to_number()
     end
   end
 
