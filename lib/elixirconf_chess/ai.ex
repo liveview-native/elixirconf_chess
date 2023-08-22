@@ -28,7 +28,7 @@ defmodule ElixirconfChess.AI do
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} =
       minimax(board, depth, -100, 100, current_player == :white, k)
 
-    {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} |> IO.inspect(label: "chosen move")
+    {eval, %Move{source: {sx, sy}, destination: {dx, dy}}}
   end
 
   defp minimax(board, 0, _, _, is_max_player, _) do
@@ -105,13 +105,6 @@ defmodule ElixirconfChess.AI do
       Enum.zip_with(Nx.to_list(probabilities), Nx.to_list(moves_idx), &{&1, &2})
       |> Enum.filter(&(elem(&1, 0) > 0))
       |> Enum.map(&index_to_move(elem(&1, 1)))
-      |> tap(fn moves ->
-        moves
-        |> Enum.map(fn move ->
-          ElixirconfChess.AlgebraicNotation.move_algebra(board, GameBoard.move(board, move), move.source, move.destination)
-        end)
-        |> IO.inspect()
-      end)
     end
   end
 
