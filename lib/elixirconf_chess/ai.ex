@@ -31,7 +31,10 @@ defmodule ElixirconfChess.AI do
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}}
   end
 
-  defp minimax(board, 0, _, _, _, _), do: {eval_board(board), nil}
+  defp minimax(board, 0, _, _, is_max_player, _) do
+    color = if is_max_player, do: :white, else: :black
+    {eval_board(board, color), nil}
+  end
 
   defp minimax(board, depth, alpha, beta, is_max_player, k) do
     moves = get_moves(board, k, is_max_player)
@@ -98,24 +101,22 @@ defmodule ElixirconfChess.AI do
     end
   end
 
-  defp eval_board(board) do
-    board
-    |> all_pieces()
-    |> Enum.reduce(0, &(&2 + eval_piece(&1)))
-  end
+  defp eval_board(board, current_player) do
+    case GameBoard.game_state(board) do
+      :draw ->
+        0
 
-  defp eval_piece(%{color: :white, type: :pawn}), do: 1
-  defp eval_piece(%{color: :white, type: :rook}), do: 5
-  defp eval_piece(%{color: :white, type: :knight}), do: 3
-  defp eval_piece(%{color: :white, type: :bishop}), do: 3
-  defp eval_piece(%{color: :white, type: :queen}), do: 9
-  defp eval_piece(%{color: :white, type: :king}), do: 0
-  defp eval_piece(%{color: :black, type: :pawn}), do: -1
-  defp eval_piece(%{color: :black, type: :rook}), do: -5
-  defp eval_piece(%{color: :black, type: :knight}), do: -3
-  defp eval_piece(%{color: :black, type: :bishop}), do: -3
-  defp eval_piece(%{color: :black, type: :queen}), do: -9
-  defp eval_piece(%{color: :black, type: :king}), do: 0
+      {:checkmate, :white} ->
+        20
+
+      {:checkmate, :black} ->
+        -20
+
+      :active ->
+        {%{"board" => board}, _} = board_to_input(board, current_player)
+        Nx.Serving.batched_run(ChessAI.EvaluatorServing, Nx.Batch.stack([%{"board" => board}]), &Nx.backend_transfer/1)
+    end
+  end
 
   def serving do
     # Configuration
@@ -189,6 +190,74 @@ defmodule ElixirconfChess.AI do
     core
     |> Axon.dense(1024, activation: :relu)
     |> Axon.dense(4096, activation: :softmax)
+  end
+
+  def evaluator_serving do
+    # Configuration
+    batch_size = 20
+    defn_options = [compiler: EXLA]
+
+    Nx.Serving.new(
+      # This function runs on the serving startup
+      fn ->
+        # Build the Axon model and load params (usually from file)
+        model = evaluator_model()
+        filename = Path.join(to_string(:code.priv_dir(:elixirconf_chess)), "evaluator_weights.nx")
+        params = filename |> File.read!() |> Nx.deserialize()
+
+        # Build the prediction defn function
+        {_init_fun, predict_fun} = Axon.build(model)
+
+        inputs_template = %{
+          "board" => Nx.template({batch_size, 8, 8, 12}, :u8)
+        }
+
+        template_args = [Nx.to_template(params), inputs_template]
+
+        # Compile the prediction function upfront for the configured batch_size
+        predict_fun = Nx.Defn.compile(predict_fun, template_args, defn_options)
+
+        # The returned function is called for every accumulated batch
+        fn inputs ->
+          inputs = Nx.Batch.pad(inputs, batch_size - inputs.size)
+          predict_fun.(params, inputs)
+        end
+      end,
+      batch_size: batch_size
+    )
+  end
+
+  defp evaluator_model do
+    board_input = Axon.input("board", shape: {nil, 8, 8, 12})
+
+    res_net = fn input, num_filters, kernel_size ->
+      first =
+        Axon.conv(input, num_filters, kernel_size: kernel_size, padding: :same, activation: :relu)
+
+      first
+      |> Axon.conv(num_filters, kernel_size: kernel_size, padding: :same, activation: :linear)
+      |> Axon.add(first)
+      |> Axon.relu()
+      |> Axon.batch_norm()
+    end
+
+    two_resnet = fn kernel_size ->
+      board_input
+      |> res_net.(16, kernel_size)
+      |> res_net.(16, kernel_size)
+    end
+
+    Enum.map([3, 7], two_resnet)
+    |> Axon.concatenate(axis: -1)
+    |> res_net.(32, 3)
+    |> Axon.conv(128, kernel_size: 8, feature_group_size: 32, activation: :linear)
+    |> Axon.batch_norm()
+    |> Axon.relu()
+    |> Axon.flatten()
+    |> Axon.dense(128, activation: :relu)
+    |> Axon.dense(128, activation: :relu)
+    |> Axon.dense(1, activation: :tanh)
+    |> Axon.nx(&Nx.multiply(&1, 20.0))
   end
 
   def board_to_input(board, current_player) do
