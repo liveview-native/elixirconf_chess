@@ -18,9 +18,15 @@ defmodule ElixirconfChessWeb.ChessLive do
         {:ok, assign(socket, :loading, true)}
 
       :else ->
-        {player_color, game_state} = Game.join(id)
+        {player_color, game_state} = Game.join(id, false)
 
         PubSub.subscribe_game(id)
+
+        can_add_ai_opponent =
+          case GameState.opponent(game_state, player_color) do
+            {:ok, _} -> true
+            {:error, _} -> false
+          end
 
         socket =
           socket
@@ -30,12 +36,16 @@ defmodule ElixirconfChessWeb.ChessLive do
           |> assign(:selection, nil)
           |> assign(:moves, [])
           |> assign(:loading, false)
+          |> assign(:can_add_ai_opponent, can_add_ai_opponent)
 
         {:ok, socket}
     end
   end
 
-  def render(%{platform_id: :swiftui, native: %{platform_config: %{user_interface_idiom: "watch"}}} = assigns) do
+  def render(
+        %{platform_id: :swiftui, native: %{platform_config: %{user_interface_idiom: "watch"}}} =
+          assigns
+      ) do
     ~SWIFTUI"""
     <VStack alignment="leading">
       <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
@@ -76,6 +86,14 @@ defmodule ElixirconfChessWeb.ChessLive do
         <%= if @player_color == :white, do: "Opponent", else: "You" %>
       </.player_chip>
 
+      <%= if @can_add_ai_opponent do %>
+        <Button phx-click="add_ai_opponent">
+          <Label system-image="play.desktopcomputer">
+            Play against Nx
+          </Label>
+        </Button>
+      <% end %>
+
       <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
 
       <.player_chip color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
@@ -108,6 +126,11 @@ defmodule ElixirconfChessWeb.ChessLive do
     </div>
     <div :if={!@loading} class="w-full flex flex-col items-center">
       <p>You: <%= @player_color %></p>
+      <%= if @can_add_ai_opponent do %>
+        <button phx-click="add_ai_opponent" style={"background-color: #{background_color(0, :web)};"} class="p-2 font-bold rounded">
+          Play against Nx
+        </button>
+      <% end %>
       <%= case @game_state.state do %>
         <% :active -> %>
           Turn:
@@ -126,7 +149,24 @@ defmodule ElixirconfChessWeb.ChessLive do
     """
   end
 
-  def handle_event("select", _, %{assigns: %{game_state: %GameState{turn: turn}, player_color: color}} = socket) when turn != color do
+  def handle_event("add_ai_opponent", _, socket) do
+    id = socket.assigns.game_id
+    {player_color, _game_state} = Game.join(id, true)
+
+    socket =
+      socket
+      |> put_flash(:success, "Added #{player_color} as AI")
+      |> assign(:can_add_ai_opponent, false)
+
+    {:noreply, socket}
+  end
+
+  def handle_event(
+        "select",
+        _,
+        %{assigns: %{game_state: %GameState{turn: turn}, player_color: color}} = socket
+      )
+      when turn != color do
     {:noreply, put_flash(socket, :error, "Not your turn")}
   end
 
@@ -154,7 +194,9 @@ defmodule ElixirconfChessWeb.ChessLive do
           assign(socket, selection: nil)
         else
           is_valid_selection =
-            !GameBoard.is_empty?(socket.assigns.game_state.board, new_position) and elem(GameBoard.value(socket.assigns.game_state.board, new_position), 0) == socket.assigns.game_state.turn
+            !GameBoard.is_empty?(socket.assigns.game_state.board, new_position) and
+              elem(GameBoard.value(socket.assigns.game_state.board, new_position), 0) ==
+                socket.assigns.game_state.turn
 
           case socket.assigns.selection do
             nil ->
@@ -193,4 +235,10 @@ defmodule ElixirconfChessWeb.ChessLive do
     ^id = socket.assigns.game_id
     {:noreply, assign(socket, :game_state, game_state)}
   end
+
+  def background_color(index, platform) when rem(index, 2) == 0,
+    do: ElixirconfChessWeb.Colors.evaluate(:odd_background, platform)
+
+  def background_color(_index, platform),
+    do: ElixirconfChessWeb.Colors.evaluate(:even_background, platform)
 end

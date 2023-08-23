@@ -18,8 +18,8 @@ defmodule ElixirconfChess.Game do
     GenServer.call(server, :get_id)
   end
 
-  def join(id) do
-    GenServer.call(name(id), :join)
+  def join(id, is_ai) do
+    GenServer.call(name(id), {:join, is_ai})
   end
 
   def alive?(id) do
@@ -36,20 +36,60 @@ defmodule ElixirconfChess.Game do
 
   def init(%{id: id}) do
     Logger.info("Starting game #{id}")
+    ai_tick()
     {:ok, %{id: id, game_state: %GameState{}}}
+  end
+
+  def handle_info(:ai_tick, state) do
+    {_eval, move} =
+      case state.game_state do
+        %{turn: :black, black_is_ai: true, state: :active} ->
+          ElixirconfChess.AI.choose_move(state.game_state.board, :black)
+
+        %{turn: :white, white_is_ai: true, state: :active} ->
+          ElixirconfChess.AI.choose_move(state.game_state.board, :white)
+
+        _ ->
+          {0, nil}
+      end
+
+    state =
+      case move do
+        %{source: source, destination: destination} ->
+          state = update_game_with_move(state, source, destination)
+          PubSub.broadcast_game(state.id, state.game_state)
+          state
+
+        _ ->
+          state
+      end
+
+    if state.game_state.state == :active do
+      ai_tick()
+    end
+
+    {:noreply, state}
   end
 
   def handle_call(:get_id, _, state) do
     {:reply, state.id, state}
   end
 
-  def handle_call(:join, {from, _}, state) do
+  def handle_call({:join, is_ai}, {from, _}, state) do
     game_state = clear_disconnected_players(state.game_state)
+
+    pid =
+      if is_ai do
+        loop = fn f -> f.(f) end
+        spawn_link(fn -> loop.(loop) end)
+      else
+        from
+      end
 
     {new_player_color, game_state} =
       case game_state do
-        %GameState{white: nil} -> {:white, %GameState{state.game_state | white: from}}
-        %GameState{black: nil} -> {:black, %GameState{state.game_state | black: from}}
+        %GameState{white: nil} -> {:white, %GameState{state.game_state | white: pid, white_is_ai: is_ai}}
+        %GameState{black: nil} -> {:black, %GameState{state.game_state | black: pid, black_is_ai: is_ai}}
         _ -> {:spectator, %GameState{state.game_state | spectators: [from | state.game_state.spectators]}}
       end
 
@@ -69,16 +109,20 @@ defmodule ElixirconfChess.Game do
       _ -> false
     end
     |> if do
-      board = GameBoard.move(state.game_state.board, selection, new_position)
-      game_state_status = GameBoard.game_state(board)
-      move_history = [ElixirconfChess.AlgebraicNotation.move_algebra(state.game_state.board, board, selection, new_position) | state.game_state.move_history]
-      game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
-      state = %{state | game_state: game_state}
+      state = update_game_with_move(state, selection, new_position)
       PubSub.broadcast_game(state.id, state.game_state)
       {:reply, :ok, state}
     else
       {:reply, :not_your_turn, state}
     end
+  end
+
+  defp update_game_with_move(state, selection, new_position) do
+    board = GameBoard.move(state.game_state.board, selection, new_position)
+    game_state_status = GameBoard.game_state(board)
+    move_history = [ElixirconfChess.AlgebraicNotation.move_algebra(state.game_state.board, board, selection, new_position) | state.game_state.move_history]
+    game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
+    %{state | game_state: game_state}
   end
 
   defp other_turn(:white), do: :black
@@ -100,4 +144,6 @@ defmodule ElixirconfChess.Game do
       game_state
     end
   end
+
+  defp ai_tick, do: Process.send_after(self(), :ai_tick, 200)
 end

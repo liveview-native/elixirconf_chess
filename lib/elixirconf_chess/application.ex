@@ -5,9 +5,13 @@ defmodule ElixirconfChess.Application do
 
   use Application
 
+  alias ElixirconfChess.AI
+
   @impl true
   def start(_type, _args) do
     children = [
+      {Nx.Serving, serving: AI.serving(), name: ChessAI.Serving, batch_timeout: 100},
+      {Nx.Serving, serving: AI.evaluator_serving(), name: ChessAI.EvaluatorServing, batch_timeout: 100},
       # Start the Telemetry supervisor
       ElixirconfChessWeb.Telemetry,
       # Start the PubSub system

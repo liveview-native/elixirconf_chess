@@ -42,22 +42,9 @@ defmodule ElixirconfChessWeb.CoreComponents do
 
   def modal(assigns) do
     ~H"""
-    <div
-      id={@id}
-      phx-mounted={@show && show_modal(@id)}
-      phx-remove={hide_modal(@id)}
-      data-cancel={JS.exec(@on_cancel, "phx-remove")}
-      class="relative z-50 hidden"
-    >
+    <div id={@id} phx-mounted={@show && show_modal(@id)} phx-remove={hide_modal(@id)} data-cancel={JS.exec(@on_cancel, "phx-remove")} class="relative z-50 hidden">
       <div id={"#{@id}-bg"} class="bg-zinc-50/90 fixed inset-0 transition-opacity" aria-hidden="true" />
-      <div
-        class="fixed inset-0 overflow-y-auto"
-        aria-labelledby={"#{@id}-title"}
-        aria-describedby={"#{@id}-description"}
-        role="dialog"
-        aria-modal="true"
-        tabindex="0"
-      >
+      <div class="fixed inset-0 overflow-y-auto" aria-labelledby={"#{@id}-title"} aria-describedby={"#{@id}-description"} role="dialog" aria-modal="true" tabindex="0">
         <div class="flex min-h-full items-center justify-center">
           <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
             <.focus_wrap
@@ -68,12 +55,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
               class="shadow-zinc-700/10 ring-zinc-700/10 relative hidden rounded-2xl bg-white p-14 shadow-lg ring-1 transition"
             >
               <div class="absolute top-6 right-5">
-                <button
-                  phx-click={JS.exec("data-cancel", to: "##{@id}")}
-                  type="button"
-                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
-                  aria-label="close"
-                >
+                <button phx-click={JS.exec("data-cancel", to: "##{@id}")} type="button" class="-m-3 flex-none p-3 opacity-20 hover:opacity-40" aria-label="close">
                   <.icon name="hero-x-mark-solid" class="h-5 w-5" />
                 </button>
               </div>
@@ -144,14 +126,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
     ~H"""
     <.flash kind={:info} title="Success!" flash={@flash} />
     <.flash kind={:error} title="Error!" flash={@flash} />
-    <.flash
-      id="disconnected"
-      kind={:error}
-      title="We can't find the internet"
-      phx-disconnected={show("#disconnected")}
-      phx-connected={hide("#disconnected")}
-      hidden
-    >
+    <.flash id="disconnected" kind={:error} title="We can't find the internet" phx-disconnected={show("#disconnected")} phx-connected={hide("#disconnected")} hidden>
       Attempting to reconnect <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
@@ -245,8 +220,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
     values: ~w(checkbox color date datetime-local email file hidden month number password
                range radio search select tel text textarea time url week)
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
@@ -254,8 +228,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
 
-  attr :rest, :global,
-    include: ~w(autocomplete cols disabled form list max maxlength min minlength
+  attr :rest, :global, include: ~w(autocomplete cols disabled form list max maxlength min minlength
                 pattern placeholder readonly required rows size step)
 
   slot :inner_block
@@ -277,15 +250,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
     <div phx-feedback-for={@name}>
       <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
         <input type="hidden" name={@name} value="false" />
-        <input
-          type="checkbox"
-          id={@id}
-          name={@name}
-          value="true"
-          checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
-          {@rest}
-        />
+        <input type="checkbox" id={@id} name={@name} value="true" checked={@checked} class="rounded border-zinc-300 text-zinc-900 focus:ring-0" {@rest} />
         <%= @label %>
       </label>
       <.error :for={msg <- @errors}><%= msg %></.error>
@@ -297,13 +262,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
-      <select
-        id={@id}
-        name={@name}
-        class="mt-1 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm"
-        multiple={@multiple}
-        {@rest}
-      >
+      <select id={@id} name={@name} class="mt-1 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm" multiple={@multiple} {@rest}>
         <option :if={@prompt} value=""><%= @prompt %></option>
         <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
       </select>
@@ -448,17 +407,9 @@ defmodule ElixirconfChessWeb.CoreComponents do
             <th class="relative p-0 pb-4"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
-        <tbody
-          id={@id}
-          phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700"
-        >
+        <tbody id={@id} phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"} class="relative divide-y divide-zinc-100 border-t border-zinc-200 text-sm leading-6 text-zinc-700">
           <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-zinc-50">
-            <td
-              :for={{col, i} <- Enum.with_index(@col)}
-              phx-click={@row_click && @row_click.(row)}
-              class={["relative p-0", @row_click && "hover:cursor-pointer"]}
-            >
+            <td :for={{col, i} <- Enum.with_index(@col)} phx-click={@row_click && @row_click.(row)} class={["relative p-0", @row_click && "hover:cursor-pointer"]}>
               <div class="block py-4 pr-6">
                 <span class="absolute -inset-y-px right-0 -left-4 group-hover:bg-zinc-50 sm:rounded-l-xl" />
                 <span class={["relative", i == 0 && "font-semibold text-zinc-900"]}>
@@ -469,10 +420,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
             <td :if={@action != []} class="relative w-14 p-0">
               <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
                 <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
-                <span
-                  :for={action <- @action}
-                  class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
-                >
+                <span :for={action <- @action} class="relative ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700">
                   <%= render_slot(action, @row_item.(row)) %>
                 </span>
               </div>
@@ -524,10 +472,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
   def back(assigns) do
     ~H"""
     <div class="mt-16">
-      <.link
-        navigate={@navigate}
-        class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
-      >
+      <.link navigate={@navigate} class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700">
         <.icon name="hero-arrow-left-solid" class="h-3 w-3" />
         <%= render_slot(@inner_block) %>
       </.link>
@@ -567,10 +512,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
   def show(js \\ %JS{}, selector) do
     JS.show(js,
       to: selector,
-      transition:
-        {"transition-all transform ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
-         "opacity-100 translate-y-0 sm:scale-100"}
+      transition: {"transition-all transform ease-out duration-300", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95", "opacity-100 translate-y-0 sm:scale-100"}
     )
   end
 
@@ -578,10 +520,7 @@ defmodule ElixirconfChessWeb.CoreComponents do
     JS.hide(js,
       to: selector,
       time: 200,
-      transition:
-        {"transition-all transform ease-in duration-200",
-         "opacity-100 translate-y-0 sm:scale-100",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
+      transition: {"transition-all transform ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
   end
 

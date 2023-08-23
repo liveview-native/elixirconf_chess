@@ -44,7 +44,7 @@ defmodule ElixirconfChessWeb.IndexLive do
     <div class="w-full flex flex-col items-center gap-2">
       <p class="text-5xl font-bold">Chess</p>
       <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
-        <button phx-click="join" phx-value-id={game_id} style={"background-color: #{background_color(index, :web)};"} class="p-2 font-bold text-white rounded">
+        <button phx-click="join" phx-value-id={game_id} phx-value-ai={:player} style={"background-color: #{background_color(index, :web)};"} class="p-2 font-bold text-white rounded">
           Join Game
         </button>
       <% end %>

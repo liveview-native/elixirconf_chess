@@ -45,20 +45,48 @@ defmodule ElixirconfChess.GameBoard do
     }
   }
   # for dev
-  @near_checkmate_board %{
-    0 => %{
-      0 => {:black, :rook, 1}, 1 => {:black, :knight, 2}, 2 => {:black, :bishop, 3}, 3 => {:black, :queen, 4}, 4 => {:black, :king, 5}, 5 => {:black, :bishop, 6}, 6 => {:black, :knight, 7}, 7 => {:black, :rook, 8}
-    },
-    1 => %{
-      0 => {:black, :pawn, 9}, 1 => {:black, :pawn, 10}, 2 => {:black, :pawn, 11}, 3 => {:black, :pawn, 12}, 4 => {:black, :pawn, 13}, 5 => {:black, :pawn, 14}, 6 => {:black, :pawn, 15}, 7 => {:black, :pawn, 16}
-    },
-    6 => %{
-      0 => {:white, :queen, 17}, 1 => {:white, :pawn, 18}, 2 => {:white, :pawn, 19}, 3 => {:white, :pawn, 20}, 4 => {:white, :pawn, 21}, 5 => {:white, :rook, 22}, 6 => {:white, :pawn, 23}, 7 => {:white, :pawn, 24}
-    },
-    7 => %{
-      0 => {:white, :rook, 25}, 1 => {:white, :knight, 26}, 2 => {:white, :bishop, 27}, 3 => {:white, :king, 28}, 4 => {:white, :pawn, 29}, 5 => {:white, :bishop, 30}, 6 => {:white, :knight, 31}, 7 => {:white, :rook, 32}
-    },
-  }
+  # @near_checkmate_board %{
+  #   0 => %{
+  #     0 => {:black, :rook, 1},
+  #     1 => {:black, :knight, 2},
+  #     2 => {:black, :bishop, 3},
+  #     3 => {:black, :queen, 4},
+  #     4 => {:black, :king, 5},
+  #     5 => {:black, :bishop, 6},
+  #     6 => {:black, :knight, 7},
+  #     7 => {:black, :rook, 8}
+  #   },
+  #   1 => %{
+  #     0 => {:black, :pawn, 9},
+  #     1 => {:black, :pawn, 10},
+  #     2 => {:black, :pawn, 11},
+  #     3 => {:black, :pawn, 12},
+  #     4 => {:black, :pawn, 13},
+  #     5 => {:black, :pawn, 14},
+  #     6 => {:black, :pawn, 15},
+  #     7 => {:black, :pawn, 16}
+  #   },
+  #   6 => %{
+  #     0 => {:white, :pawn, 17},
+  #     1 => {:white, :pawn, 18},
+  #     2 => {:white, :pawn, 19},
+  #     3 => {:white, :pawn, 20},
+  #     4 => {:white, :pawn, 21},
+  #     5 => {:white, :pawn, 22},
+  #     6 => {:white, :pawn, 23},
+  #     7 => {:white, :pawn, 24}
+  #   },
+  #   7 => %{
+  #     0 => {:white, :rook, 25},
+  #     1 => {:white, :knight, 26},
+  #     2 => {:white, :bishop, 27},
+  #     3 => {:white, :queen, 28},
+  #     4 => {:white, :king, 29},
+  #     5 => {:white, :bishop, 30},
+  #     6 => {:white, :knight, 31},
+  #     7 => {:white, :rook, 32}
+  #   }
+  # }
 
   # def start_board, do: @near_checkmate_board
   def start_board, do: @start_board
@@ -303,6 +331,11 @@ defmodule ElixirconfChess.GameBoard do
               do_possible_moves(board, {x, y}, value)
             end
 
+          moves =
+            Enum.reject(moves, fn %Move{destination: {dest_x, dest_y}} ->
+              dest_x < 0 or dest_x > 7 or dest_y < 0 or dest_y > 7
+            end)
+
           moves ++ acc
 
         _, acc ->
@@ -327,10 +360,17 @@ defmodule ElixirconfChess.GameBoard do
     end
   end
 
+  def move(board, %Move{source: source, destination: dest}) do
+    move(board, source, dest)
+  end
+
   def move(board, {origin_x, origin_y} = origin, {x, y}) do
     piece = value(board, origin)
     # remove the piece from its old position
-    board = Map.get_and_update(board, origin_y, fn row -> {row, Map.pop(row, origin_x) |> elem(1)} end) |> elem(1)
+    board =
+      Map.get_and_update(board, origin_y, fn row -> {row, Map.pop(row, origin_x) |> elem(1)} end)
+      |> elem(1)
+
     # put the piece in its new position
     if Map.has_key?(board, y) do
       Map.get_and_update(board, y, fn row -> {row, Map.put(row, x, piece)} end) |> elem(1)

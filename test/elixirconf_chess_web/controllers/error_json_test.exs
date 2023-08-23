@@ -2,7 +2,9 @@ defmodule ElixirconfChessWeb.ErrorJSONTest do
   use ElixirconfChessWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert ElixirconfChessWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert ElixirconfChessWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do

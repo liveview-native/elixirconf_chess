@@ -7,7 +7,6 @@ config :elixirconf_chess, ElixirconfChessWeb.Endpoint,
   secret_key_base: "VQ/43RLaUywSmztL5WU8uU4VHsLaHLvWRmXUAhDSb8K/yM9G6pGhwfZmoJnTcwAL",
   server: false
 
-
 # Print only warnings and errors during test
 config :logger, level: :warning
 
