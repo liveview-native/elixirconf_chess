@@ -87,7 +87,7 @@ defmodule ElixirconfChessWeb.ChessLive do
       </.player_chip>
 
       <%= if @can_add_ai_opponent do %>
-        <Button phx-click="create">
+        <Button phx-click="add_ai_opponent">
           <Label system-image="play.desktopcomputer">
             Play against Nx
           </Label>
