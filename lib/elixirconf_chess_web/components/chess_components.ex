@@ -103,6 +103,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
   attr :turn, :any
   attr :board, :any
   attr :platform_id, :any
+  attr :can_add_ai_opponent, :boolean
   slot :inner_block
 
   def player_chip(%{platform_id: :swiftui} = assigns) do
@@ -129,7 +130,14 @@ defmodule ElixirconfChessWeb.ChessComponents do
           fn {_, type, id} -> {id, GameBoard.piece(type)} end
         )
       %>
-      <ScrollView axes="horizontal" modifiers={font(font: {:system, :large_title}) |> foreground_style({:color, GameBoard.enemy(@color)})}>
+      <ScrollView
+        axes="horizontal"
+        modifiers={
+          font(font: {:system, :large_title})
+          |> foreground_style({:color, GameBoard.enemy(@color)})
+          |> overlay(alignment: :trailing, content: :ai_opponent)
+        }
+      >
         <HStack>
           <Text
             :for={{id, image} <- captures}
@@ -137,6 +145,22 @@ defmodule ElixirconfChessWeb.ChessComponents do
             verbatim={image}
           />
         </HStack>
+
+        <Group template={:ai_opponent}>
+          <Button
+            :if={@can_add_ai_opponent and Map.get(@game_state, @color) == nil}
+            phx-click="add_ai_opponent"
+            modifiers={
+              padding(8)
+              |> background(Colors.swiftui(if @turn == @color, do: :even_background, else: :odd_background), in: {:rounded_rectangle, radius: 6})
+              |> padding(:trailing, 8)
+            }
+          >
+            <Label system-image="play.desktopcomputer">
+              Play against Nx
+            </Label>
+          </Button>
+        </Group>
       </ScrollView>
     </HStack>
     """

@@ -93,21 +93,29 @@ defmodule ElixirconfChessWeb.ChessLive do
         </ToolbarItem>
       </Group>
 
-      <.player_chip game_state={@game_state} color={:black} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
+      <.player_chip
+        game_state={@game_state}
+        color={:black}
+        turn={@game_state.turn}
+        board={@game_state.board}
+        platform_id={:swiftui}
+
+        can_add_ai_opponent={@can_add_ai_opponent}
+      >
         <%= if @player_color == :white, do: "Opponent", else: "You" %>
       </.player_chip>
 
-      <%= if @can_add_ai_opponent do %>
-        <Button phx-click="add_ai_opponent">
-          <Label system-image="play.desktopcomputer">
-            Play against Nx
-          </Label>
-        </Button>
-      <% end %>
-
       <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
 
-      <.player_chip game_state={@game_state} color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
+      <.player_chip
+        game_state={@game_state}
+        color={:white}
+        turn={@game_state.turn}
+        board={@game_state.board}
+        platform_id={:swiftui}
+
+        can_add_ai_opponent={@can_add_ai_opponent}
+      >
         <%= if @player_color == :white, do: "You", else: "Opponent" %>
       </.player_chip>
 
