@@ -108,9 +108,18 @@ defmodule ElixirconfChess.GameBoard do
       3 => {:white, :pawn, 19},
     }
   }
+  @near_promotion_board %{
+    1 => %{
+      0 => {:white, :pawn, 1}
+    },
+    7 => %{
+      0 => {:white, :king, 2},
+      7 => {:black, :king, 3},
+    }
+  }
 
   # def start_board, do: @near_checkmate_board
-  def start_board, do: @start_board
+  def start_board, do: @near_promotion_board
 
   def x_range, do: 0..7
   def y_range, do: 0..7
@@ -203,6 +212,10 @@ defmodule ElixirconfChess.GameBoard do
     do: true
   def is_en_passant?(_state, _position, _turn), do: false
 
+  def is_promotion?({:white, :pawn, _}, {_, 0}), do: true
+  def is_promotion?({:black, :pawn, _}, {_, 7}), do: true
+  def is_promotion?(_value, _position), do: false
+
   def enemy(:white), do: :black
   def enemy(:black), do: :white
 
@@ -233,7 +246,7 @@ defmodule ElixirconfChess.GameBoard do
 
       moves ->
         Enum.reject(moves, fn %{destination: target} ->
-          in_check?(%{ state | board: move(state, position, target) }, turn)
+        in_check?(%{ state | board: move(state, position, target, nil) }, turn)
         end)
 
         # the player cannot put themselves in check
@@ -395,14 +408,17 @@ defmodule ElixirconfChess.GameBoard do
     end
   end
 
-  def move(state, %Move{ source: origin, destination: destination }) do
-    move(state, origin, destination)
+<<<<<<< HEAD
+  def move(state, %Move{ source: origin, destination: destination }, promotion_type) do
+    move(state, origin, destination, promotion_type)
   end
 
-  def move(%{ board: board } = state, {origin_x, origin_y} = origin, {x, y} = destination) do
+  def move(%{ board: board } = state, {origin_x, origin_y} = origin, {x, y} = destination, promotion_type) do
     piece = value(board, origin)
     # remove the piece from its old position
     board = Map.get_and_update(board, origin_y, fn row -> {row, Map.drop(row, [origin_x])} end) |> elem(1)
+    # promote
+    piece = if(is_promotion?(piece, new_position), do: {elem(piece, 0), promotion_type, elem(piece, 2) + 100}, else: piece)
     # put the piece in its new position
     board = if Map.has_key?(board, y) do
       Map.get_and_update(board, y, fn row -> {row, Map.put(row, x, piece)} end) |> elem(1)
