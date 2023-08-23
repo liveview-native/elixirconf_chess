@@ -166,6 +166,41 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
+  def player_chip(%{platform_id: :web} = assigns) do
+    ~SWIFTUI"""
+    <div class={"w-full flex flex-row my-2 py-2 px-4 rounded-md " <> if(GameBoard.in_check?(@game_state, @color), do: "border-4 border-rose-500", else: "")} style={"background-color: #{Colors.web(if @turn == @color, do: :odd_background, else: :even_background)}"}>
+      <div class="flex flex-col">
+        <p class="text-md font-bold"><%= render_slot(@inner_block) %></p>
+        <p class="text-sm"><%= @color |> Atom.to_string() |> String.capitalize() %></p>
+      </div>
+      <%
+        captures = Enum.map(
+          GameBoard.captures(@board, @color),
+          fn {_, type, id} -> {id, GameBoard.piece(type)} end
+        )
+      %>
+      <%= if @can_add_ai_opponent and Map.get(@game_state, @color) == nil do %>
+        <div class="flex-grow"></div>
+        <button
+          phx-click="add_ai_opponent"
+          class="py-2 px-4 rounded-md font-bold"
+          style={"background-color: #{Colors.web(if @turn == @color, do: :even_background, else: :odd_background)}"}
+        >
+          Play against Nx
+        </button>
+      <% else %>
+        <div class="overflow-x-scroll text-3xl flex-grow">
+          <div class="flex flex-row px-4 gap-4">
+            <p :for={{id, image} <- captures} id={"#{id}"}>
+              <%= image %>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
   def tile_color({x, y}) do
     cond do
       rem(x, 2) == rem(y, 2) ->
