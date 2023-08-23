@@ -408,7 +408,6 @@ defmodule ElixirconfChess.GameBoard do
     end
   end
 
-<<<<<<< HEAD
   def move(state, %Move{ source: origin, destination: destination }, promotion_type) do
     move(state, origin, destination, promotion_type)
   end
@@ -418,7 +417,7 @@ defmodule ElixirconfChess.GameBoard do
     # remove the piece from its old position
     board = Map.get_and_update(board, origin_y, fn row -> {row, Map.drop(row, [origin_x])} end) |> elem(1)
     # promote
-    piece = if(is_promotion?(piece, new_position), do: {elem(piece, 0), promotion_type, elem(piece, 2) + 100}, else: piece)
+    piece = if(is_promotion?(piece, destination), do: {elem(piece, 0), promotion_type, elem(piece, 2) + 100}, else: piece)
     # put the piece in its new position
     board = if Map.has_key?(board, y) do
       Map.get_and_update(board, y, fn row -> {row, Map.put(row, x, piece)} end) |> elem(1)
