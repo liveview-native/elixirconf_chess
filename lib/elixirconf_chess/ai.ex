@@ -53,8 +53,8 @@ defmodule ElixirconfChess.AI do
     eval_fn =
       if is_max_player do
         fn move, alpha, best_move ->
-          board_with_move = GameBoard.move(game_state, move)
-          {evaluation, _} = minimax(%{game_state | board: board_with_move}, depth - 1, alpha, beta, false, k)
+          board_with_move = GameBoard.move(game_state, move, :queen)
+          {evaluation, _} = minimax(%{ game_state | board: board_with_move }, depth - 1, alpha, beta, false, k)
           new_alpha = if evaluation > alpha, do: evaluation, else: alpha
           new_best_move = if evaluation > alpha, do: move, else: best_move
 
@@ -66,8 +66,8 @@ defmodule ElixirconfChess.AI do
         end
       else
         fn move, beta, best_move ->
-          board_with_move = GameBoard.move(game_state, move)
-          {evaluation, _} = minimax(%{game_state | board: board_with_move}, depth - 1, alpha, beta, true, k)
+          board_with_move = GameBoard.move(game_state, move, :queen)
+          {evaluation, _} = minimax(%{ game_state | board: board_with_move }, depth - 1, alpha, beta, true, k)
           new_beta = if evaluation < beta, do: evaluation, else: beta
           new_best_move = if evaluation < beta, do: move, else: best_move
 

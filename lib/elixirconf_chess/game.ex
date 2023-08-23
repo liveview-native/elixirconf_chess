@@ -59,7 +59,7 @@ defmodule ElixirconfChess.Game do
     state =
       case move do
         %{source: source, destination: destination} ->
-          state = update_game_with_move(state, source, destination)
+          state = update_game_with_move(state, source, destination, :queen)
           PubSub.broadcast_game(state.id, state.game_state)
           state
 
