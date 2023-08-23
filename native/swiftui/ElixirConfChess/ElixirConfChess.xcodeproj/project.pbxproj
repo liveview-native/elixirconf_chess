@@ -654,7 +654,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/liveview-native/liveview-client-swiftui";
 			requirement = {
-				branch = "optimize-view-bodies";
+				branch = main;
 				kind = branch;
 			};
 		};

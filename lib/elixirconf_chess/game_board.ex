@@ -88,6 +88,27 @@ defmodule ElixirconfChess.GameBoard do
   #   }
   # }
 
+  # for dev
+  @en_passant_board %{
+    1 => %{
+      1 => {:black, :pawn, 1},
+      3 => {:black, :pawn, 2},
+    },
+    3 => %{
+      0 => {:white, :pawn, 3},
+      2 => {:white, :pawn, 4},
+    },
+    4 => %{
+      0 => {:black, :pawn, 9},
+      2 => {:black, :pawn, 10},
+    },
+    # ...
+    6 => %{
+      1 => {:white, :pawn, 18},
+      3 => {:white, :pawn, 19},
+    }
+  }
+
   # def start_board, do: @near_checkmate_board
   def start_board, do: @start_board
 
@@ -98,9 +119,9 @@ defmodule ElixirconfChess.GameBoard do
 
   def is_empty?(board, position), do: value(board, position) == nil
 
-  def game_state(board) do
-    white_moves = possible_moves(board, :white, true)
-    black_moves = possible_moves(board, :black, true)
+  def game_state(state) do
+    white_moves = possible_moves(state, :white, true)
+    black_moves = possible_moves(state, :black, true)
 
     case {white_moves, black_moves} do
       {[], []} ->
@@ -113,7 +134,16 @@ defmodule ElixirconfChess.GameBoard do
         {:checkmate, :black}
 
       {_, _} ->
-        :active
+        white_check = in_check?(state, :white)
+        black_check = in_check?(state, :black)
+        case {white_check, black_check} do
+          {true, false} ->
+            {:active, {:check, :white}}
+          {false, true} ->
+            {:active, {:check, :black}}
+          {_, _} ->
+            {:active, nil}
+        end
     end
   end
 
@@ -168,6 +198,11 @@ defmodule ElixirconfChess.GameBoard do
 
   def is_on_board?({x, y}), do: x >= 0 and y >= 0 and x <= 7 and y <= 7
 
+  def is_en_passant?(%{ move_history: [%{ value: {prev_turn, :pawn, _}, source: {_prev_x, prev_y}, destination: {prev_dest_x, prev_dest_y} } | _] }, {x, _y}, turn)
+    when (abs(prev_y - prev_dest_y) == 2) and prev_turn != turn and prev_dest_x == x,
+    do: true
+  def is_en_passant?(_state, _position, _turn), do: false
+
   def enemy(:white), do: :black
   def enemy(:black), do: :white
 
@@ -188,34 +223,34 @@ defmodule ElixirconfChess.GameBoard do
   def piece(:knight), do: "♞"
   def piece(:pawn), do: "♟︎"
 
-  def possible_moves(board, {x, y} = position) when is_number(x) and is_number(y) do
-    position_value = value(board, position)
+  def possible_moves(state, {x, y} = position) when is_number(x) and is_number(y) do
+    position_value = value(state.board, position)
     {turn, _, _} = position_value
 
-    case do_possible_moves(board, position, position_value) do
+    case do_possible_moves(state, position, position_value) do
       [] ->
         []
 
       moves ->
         Enum.reject(moves, fn %{destination: target} ->
-          in_check?(move(board, position, target), turn)
+          in_check?(%{ state | board: move(state, position, target) }, turn)
         end)
 
         # the player cannot put themselves in check
     end
   end
 
-  def possible_moves(board, turn, discard_checks) when turn in [:white, :black] do
+  def possible_moves(state, turn, discard_checks) when turn in [:white, :black] do
     Enum.reduce(
-      board,
+      state.board,
       [],
-      fn {y, row}, acc -> row_moves(board, y, row, turn, discard_checks) ++ acc end
+      fn {y, row}, acc -> row_moves(state, y, row, turn, discard_checks) ++ acc end
     )
   end
 
-  defp do_possible_moves(_board, _position, nil), do: []
+  defp do_possible_moves(_state, _position, nil), do: []
 
-  defp do_possible_moves(board, {x, y} = source, {turn, :pawn, _}) do
+  defp do_possible_moves(state, {x, y} = source, {turn, :pawn, _}) do
     {start, direction} =
       case turn do
         :white ->
@@ -225,17 +260,17 @@ defmodule ElixirconfChess.GameBoard do
           {1, 1}
       end
 
-    captures = for p <- for(i <- [-1, 1], do: {x + i, y + direction}), is_enemy?(turn, board, p), do: p
+    captures = for p <- for(i <- [-1, 1], do: {x + i, y + direction}), is_enemy?(turn, state.board, p) or is_en_passant?(state, p, turn), do: p
     next = {x, y + direction}
 
     moves =
-      if is_empty?(board, next) do
+      if is_empty?(state.board, next) do
         moves = [next | captures]
 
         if y == start do
           next = {x, y + direction * 2}
 
-          if is_empty?(board, next) do
+          if is_empty?(state.board, next) do
             [next | moves]
           else
             moves
@@ -247,20 +282,20 @@ defmodule ElixirconfChess.GameBoard do
         captures
       end
 
-    Enum.map(moves, &Move.new(source, &1))
+    Enum.map(moves, &Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(board, {x, y} = source, {turn, :rook, _}) do
+  defp do_possible_moves(state, {x, y} = source, {turn, :rook, _}) do
     Enum.concat([
-      directional_moves([], turn, board, {x - 1, y}, {-1, 0}),
-      directional_moves([], turn, board, {x + 1, y}, {1, 0}),
-      directional_moves([], turn, board, {x, y - 1}, {0, -1}),
-      directional_moves([], turn, board, {x, y + 1}, {0, 1})
+      directional_moves([], turn, state, {x - 1, y}, {-1, 0}),
+      directional_moves([], turn, state, {x + 1, y}, {1, 0}),
+      directional_moves([], turn, state, {x, y - 1}, {0, -1}),
+      directional_moves([], turn, state, {x, y + 1}, {0, 1})
     ])
-    |> Enum.map(&Move.new(source, &1))
+    |> Enum.map(&Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(board, {x, y} = source, {turn, :knight, _}) do
+  defp do_possible_moves(state, {x, y} = source, {turn, :knight, _}) do
     moves = [
       {x - 2, y - 1},
       {x - 2, y + 1},
@@ -272,36 +307,36 @@ defmodule ElixirconfChess.GameBoard do
       {x + 1, y + 2}
     ]
 
-    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
+    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, state.board, p), do: p
 
-    Enum.map(moves, &Move.new(source, &1))
+    Enum.map(moves, &Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(board, {x, y} = source, {turn, :bishop, _}) do
+  defp do_possible_moves(state, {x, y} = source, {turn, :bishop, _}) do
     Enum.concat([
-      directional_moves([], turn, board, {x - 1, y - 1}, {-1, -1}),
-      directional_moves([], turn, board, {x + 1, y - 1}, {1, -1}),
-      directional_moves([], turn, board, {x - 1, y + 1}, {-1, 1}),
-      directional_moves([], turn, board, {x + 1, y + 1}, {1, 1})
+      directional_moves([], turn, state, {x - 1, y - 1}, {-1, -1}),
+      directional_moves([], turn, state, {x + 1, y - 1}, {1, -1}),
+      directional_moves([], turn, state, {x - 1, y + 1}, {-1, 1}),
+      directional_moves([], turn, state, {x + 1, y + 1}, {1, 1})
     ])
-    |> Enum.map(&Move.new(source, &1))
+    |> Enum.map(&Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(board, {x, y} = source, {turn, :queen, _}) do
+  defp do_possible_moves(state, {x, y} = source, {turn, :queen, _}) do
     Enum.concat([
-      directional_moves([], turn, board, {x - 1, y}, {-1, 0}),
-      directional_moves([], turn, board, {x + 1, y}, {1, 0}),
-      directional_moves([], turn, board, {x, y - 1}, {0, -1}),
-      directional_moves([], turn, board, {x, y + 1}, {0, 1}),
-      directional_moves([], turn, board, {x - 1, y - 1}, {-1, -1}),
-      directional_moves([], turn, board, {x + 1, y - 1}, {1, -1}),
-      directional_moves([], turn, board, {x - 1, y + 1}, {-1, 1}),
-      directional_moves([], turn, board, {x + 1, y + 1}, {1, 1})
+      directional_moves([], turn, state, {x - 1, y}, {-1, 0}),
+      directional_moves([], turn, state, {x + 1, y}, {1, 0}),
+      directional_moves([], turn, state, {x, y - 1}, {0, -1}),
+      directional_moves([], turn, state, {x, y + 1}, {0, 1}),
+      directional_moves([], turn, state, {x - 1, y - 1}, {-1, -1}),
+      directional_moves([], turn, state, {x + 1, y - 1}, {1, -1}),
+      directional_moves([], turn, state, {x - 1, y + 1}, {-1, 1}),
+      directional_moves([], turn, state, {x + 1, y + 1}, {1, 1})
     ])
-    |> Enum.map(&Move.new(source, &1))
+    |> Enum.map(&Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(board, {x, y} = source, {turn, :king, _}) do
+  defp do_possible_moves(state, {x, y} = source, {turn, :king, _}) do
     moves = [
       {x - 1, y},
       {x - 1, y + 1},
@@ -313,12 +348,12 @@ defmodule ElixirconfChess.GameBoard do
       {x, y + 1}
     ]
 
-    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
+    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, state.board, p), do: p
 
-    Enum.map(moves, &Move.new(source, &1))
+    Enum.map(moves, &Move.new(state, source, &1))
   end
 
-  defp row_moves(board, y, row, turn, discard_checks) do
+  defp row_moves(state, y, row, turn, discard_checks) do
     Enum.reduce(
       row,
       [],
@@ -326,9 +361,9 @@ defmodule ElixirconfChess.GameBoard do
         {x, {^turn, _, _} = value}, acc ->
           moves =
             if discard_checks do
-              possible_moves(board, {x, y})
+              possible_moves(state, {x, y})
             else
-              do_possible_moves(board, {x, y}, value)
+              do_possible_moves(state, {x, y}, value)
             end
 
           moves =
@@ -344,44 +379,51 @@ defmodule ElixirconfChess.GameBoard do
     )
   end
 
-  defp directional_moves(moves, turn, board, {x, y} = position, {dx, dy} = direction) do
+  defp directional_moves(moves, turn, state, {x, y} = position, {dx, dy} = direction) do
     cond do
       !is_on_board?(position) ->
         moves
 
-      is_self?(turn, board, position) ->
+      is_self?(turn, state.board, position) ->
         moves
 
-      !is_empty?(board, position) ->
+      !is_empty?(state.board, position) ->
         [position | moves]
 
       true ->
-        directional_moves([position | moves], turn, board, {x + dx, y + dy}, direction)
+        directional_moves([position | moves], turn, state, {x + dx, y + dy}, direction)
     end
   end
 
-  def move(board, %Move{source: source, destination: dest}) do
-    move(board, source, dest)
+  def move(state, %Move{ source: origin, destination: destination }) do
+    move(state, origin, destination)
   end
 
-  def move(board, {origin_x, origin_y} = origin, {x, y}) do
+  def move(%{ board: board } = state, {origin_x, origin_y} = origin, {x, y} = destination) do
     piece = value(board, origin)
     # remove the piece from its old position
-    board =
-      Map.get_and_update(board, origin_y, fn row -> {row, Map.pop(row, origin_x) |> elem(1)} end)
-      |> elem(1)
-
+    board = Map.get_and_update(board, origin_y, fn row -> {row, Map.drop(row, [origin_x])} end) |> elem(1)
     # put the piece in its new position
-    if Map.has_key?(board, y) do
+    board = if Map.has_key?(board, y) do
       Map.get_and_update(board, y, fn row -> {row, Map.put(row, x, piece)} end) |> elem(1)
     else
       Map.put(board, y, %{x => piece})
     end
+    case piece do
+      {_, :pawn, _} ->
+        if is_en_passant?(state, destination, state.turn) do
+          Map.get_and_update(board, origin_y, fn row -> {row, Map.drop(row, [x])} end) |> elem(1)
+        else
+          board
+        end
+      _ ->
+        board
+    end
   end
 
-  def in_check?(board, turn) do
-    king = locate(board, {turn, :king})
-    destinations = board |> possible_moves(enemy(turn), false) |> Enum.map(& &1.destination)
+  def in_check?(state, turn) do
+    king = locate(state.board, {turn, :king})
+    destinations = state |> possible_moves(enemy(turn), false) |> Enum.map(& &1.destination)
     king in destinations
   end
 

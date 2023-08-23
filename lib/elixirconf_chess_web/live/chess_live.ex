@@ -6,6 +6,7 @@ defmodule ElixirconfChessWeb.ChessLive do
   alias ElixirconfChess.PubSub
   alias ElixirconfChess.GameBoard
   alias ElixirconfChess.GameState
+  alias ElixirconfChess.AlgebraicNotation
 
   alias ElixirconfChess.Game
 
@@ -48,7 +49,7 @@ defmodule ElixirconfChessWeb.ChessLive do
       ) do
     ~SWIFTUI"""
     <VStack alignment="leading">
-      <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
+      <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
     </VStack>
     """
   end
@@ -82,7 +83,7 @@ defmodule ElixirconfChessWeb.ChessLive do
         </ToolbarItem>
       </Group>
 
-      <.player_chip color={:black} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
+      <.player_chip game_state={@game_state} color={:black} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
         <%= if @player_color == :white, do: "Opponent", else: "You" %>
       </.player_chip>
 
@@ -94,9 +95,9 @@ defmodule ElixirconfChessWeb.ChessLive do
         </Button>
       <% end %>
 
-      <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
+      <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
 
-      <.player_chip color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
+      <.player_chip game_state={@game_state} color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
         <%= if @player_color == :white, do: "You", else: "Opponent" %>
       </.player_chip>
 
@@ -110,7 +111,7 @@ defmodule ElixirconfChessWeb.ChessLive do
             id={"move-#{length(@game_state.move_history) - index}"}
             modifiers={padding(:horizontal, 4)}
           >
-            <%= move %>
+            <%= AlgebraicNotation.move_algebra(move) %>
           </Text>
         </HStack>
       </ScrollView>
@@ -132,18 +133,28 @@ defmodule ElixirconfChessWeb.ChessLive do
         </button>
       <% end %>
       <%= case @game_state.state do %>
-        <% :active -> %>
-          Turn:
-          <p class="text-4xl font-bold"><%= @game_state.turn |> Atom.to_string() |> String.capitalize() %><span :if={@game_state.turn != @player_color}> (Not you)</span></p>
         <% :draw -> %>
           Draw
         <% {:checkmate, :white} -> %>
           Checkmate - Black Wins
         <% {:checkmate, :black} -> %>
           Checkmate - White Wins
+        <% _ -> %>
+          Turn:
+            <p class="text-4xl font-bold"><%= @game_state.turn |> Atom.to_string() |> String.capitalize() %><span :if={@game_state.turn != @player_color}> (Not you)</span></p>
       <% end %>
 
-      <.game_board board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:web} native={@native} />
+      <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:web} native={@native} />
+
+      <div class="flex flex-row overflow-x-scroll w-full max-w-2xl py-4">
+        <p
+          :for={{move, index} <- Enum.with_index(@game_state.move_history)}
+          id={"move-#{length(@game_state.move_history) - index}"}
+          class="px-4"
+        >
+          <%= AlgebraicNotation.move_algebra(move) %>
+        </p>
+      </div>
     </div>
     <pre :if={!@loading} hidden><%= inspect(@game_state, pretty: true) %></pre>
     """
@@ -178,8 +189,8 @@ defmodule ElixirconfChessWeb.ChessLive do
         _, %{selection: nil} ->
           []
 
-        _, %{game_state: %GameState{board: board}, selection: selection} ->
-          board
+        _, %{game_state: game_state, selection: selection} ->
+          game_state
           |> GameBoard.possible_moves(selection)
           |> Enum.map(& &1.destination)
       end)
@@ -189,7 +200,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
   def select(socket, new_position) do
     case socket.assigns.game_state.state do
-      :active ->
+      {:active, _} ->
         if new_position == socket.assigns.selection do
           assign(socket, selection: nil)
         else
@@ -208,7 +219,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
             selection ->
               valid_moves =
-                socket.assigns.game_state.board
+                socket.assigns.game_state
                 |> GameBoard.possible_moves(selection)
                 |> Enum.map(& &1.destination)
 
