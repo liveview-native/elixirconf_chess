@@ -120,9 +120,42 @@ defmodule ElixirconfChess.GameBoard do
       7 => {:black, :king, 3},
     }
   }
+  @near_castling_board %{
+    0 => %{
+      0 => {:black, :rook, 1},
+      4 => {:black, :king, 5},
+      7 => {:black, :rook, 8}
+    },
+    1 => %{
+      0 => {:black, :pawn, 9},
+      1 => {:black, :pawn, 10},
+      2 => {:black, :pawn, 11},
+      3 => {:black, :pawn, 12},
+      4 => {:black, :pawn, 13},
+      5 => {:black, :pawn, 14},
+      6 => {:black, :pawn, 15},
+      7 => {:black, :pawn, 16}
+    },
+    # ...
+    6 => %{
+      0 => {:white, :pawn, 17},
+      1 => {:white, :pawn, 18},
+      2 => {:white, :pawn, 19},
+      3 => {:white, :pawn, 20},
+      4 => {:white, :pawn, 21},
+      5 => {:white, :pawn, 22},
+      6 => {:white, :pawn, 23},
+      7 => {:white, :pawn, 24}
+    },
+    7 => %{
+      0 => {:white, :rook, 25},
+      4 => {:white, :king, 29},
+      7 => {:white, :rook, 32}
+    }
+  }
 
   # def start_board, do: @near_checkmate_board
-  def start_board, do: @start_board
+  def start_board, do: @near_castling_board
 
   def x_range, do: 0..7
   def y_range, do: 0..7
@@ -218,6 +251,8 @@ defmodule ElixirconfChess.GameBoard do
   def is_promotion?({:white, :pawn, _}, {_, 0}), do: true
   def is_promotion?({:black, :pawn, _}, {_, 7}), do: true
   def is_promotion?(_value, _position), do: false
+
+  def can_castle_left?(state, turn), do: false
 
   def enemy(:white), do: :black
   def enemy(:black), do: :white
@@ -352,7 +387,7 @@ defmodule ElixirconfChess.GameBoard do
     |> Enum.map(&Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(state, {x, y} = source, {turn, :king, _}) do
+  defp do_possible_moves(%{ board: board } = state, {x, y} = source, {turn, :king, _}) do
     moves = [
       {x - 1, y},
       {x - 1, y + 1},
@@ -364,7 +399,22 @@ defmodule ElixirconfChess.GameBoard do
       {x, y + 1}
     ]
 
-    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, state.board, p), do: p
+    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
+
+    if can_castle_left?(state, turn) do
+      moves = case {value(board, {x - 1, y}), value(board, {x - 2, y})} do
+        {nil, nil} ->
+          [{x - 2, y} | moves]
+        {_, _} ->
+          moves
+      end
+    end
+    moves = case {value(board, {x + 1, y}), value(board, {x + 2, y})} do
+      {nil, nil} ->
+        [{x + 2, y} | moves]
+      {_, _} ->
+        moves
+    end
 
     Enum.map(moves, &Move.new(state, source, &1))
   end
