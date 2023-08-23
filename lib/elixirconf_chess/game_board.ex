@@ -112,6 +112,9 @@ defmodule ElixirconfChess.GameBoard do
     1 => %{
       0 => {:white, :pawn, 1}
     },
+    6 => %{
+      3 => {:black, :pawn, 4},
+    },
     7 => %{
       0 => {:white, :king, 2},
       7 => {:black, :king, 3},
@@ -119,7 +122,7 @@ defmodule ElixirconfChess.GameBoard do
   }
 
   # def start_board, do: @near_checkmate_board
-  def start_board, do: @start_board
+  def start_board, do: @near_promotion_board
 
   def x_range, do: 0..7
   def y_range, do: 0..7

@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/liveview-native/liveview-client-swiftui",
       "state" : {
-        "branch" : "phx-change-support",
-        "revision" : "d1595cd6ca13934291b35b1822d1602f78f7a4e8"
+        "branch" : "main",
+        "revision" : "10929f9078fcb9ed82ea6610a33ec62dbe76c447"
       }
     },
     {
