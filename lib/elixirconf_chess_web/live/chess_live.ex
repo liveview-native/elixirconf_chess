@@ -102,7 +102,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
         can_add_ai_opponent={@can_add_ai_opponent}
       >
-        <%= if @player_color == :white, do: "Opponent", else: "You" %>
+        <%= if(@player_color == :white, do: if(@game_state.black_is_ai, do: "Nx", else: "Opponent"), else: "You") %>
       </.player_chip>
 
       <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
@@ -116,7 +116,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
         can_add_ai_opponent={@can_add_ai_opponent}
       >
-        <%= if @player_color == :white, do: "You", else: "Opponent" %>
+        <%= if(@player_color == :white, do: "You", else: if(@game_state.white_is_ai, do: "Nx", else: "Opponent")) %>
       </.player_chip>
 
       <Spacer />
