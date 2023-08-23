@@ -43,11 +43,11 @@ defmodule ElixirconfChess.Game do
   def handle_info(:ai_tick, state) do
     {_eval, move} =
       case state.game_state do
-        %{turn: :black, black_is_ai: true, state: :active} ->
-          ElixirconfChess.AI.choose_move(state.game_state.board, :black)
+        %{turn: :black, black_is_ai: true, state: {:active, _}} ->
+          ElixirconfChess.AI.choose_move(state.game_state, :black)
 
-        %{turn: :white, white_is_ai: true, state: :active} ->
-          ElixirconfChess.AI.choose_move(state.game_state.board, :white)
+        %{turn: :white, white_is_ai: true, state: {:active, _}} ->
+          ElixirconfChess.AI.choose_move(state.game_state, :white)
 
         _ ->
           {0, nil}
@@ -64,8 +64,11 @@ defmodule ElixirconfChess.Game do
           state
       end
 
-    if state.game_state.state == :active do
-      ai_tick()
+    case state.game_state.state do
+      {:active, _} ->
+        ai_tick()
+      _ ->
+        nil
     end
 
     {:noreply, state}
@@ -122,7 +125,7 @@ defmodule ElixirconfChess.Game do
     game_state_status = GameBoard.game_state(state.game_state)
     move_history = [GameBoard.Move.new(state.game_state, selection, new_position, true) | state.game_state.move_history]
     game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
-    state = %{state | game_state: game_state}
+    %{state | game_state: game_state}
   end
 
   defp other_turn(:white), do: :black

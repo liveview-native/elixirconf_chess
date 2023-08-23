@@ -98,6 +98,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
+  attr :game_state, :any
   attr :color, :any
   attr :turn, :any
   attr :board, :any

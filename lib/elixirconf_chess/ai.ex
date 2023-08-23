@@ -24,20 +24,20 @@ defmodule ElixirconfChess.AI do
   @minimax_depth 4
   @top_k_moves 2
 
-  def choose_move(board, current_player, depth \\ @minimax_depth, k \\ @top_k_moves) do
+  def choose_move(game_state, current_player, depth \\ @minimax_depth, k \\ @top_k_moves) do
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} =
-      minimax(board, depth, -100, 100, current_player == :white, k)
+      minimax(game_state, depth, -100, 100, current_player == :white, k)
 
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}}
   end
 
-  defp minimax(board, 0, _, _, is_max_player, _) do
+  defp minimax(game_state, 0, _, _, is_max_player, _) do
     color = if is_max_player, do: :white, else: :black
-    {eval_board(board, color), nil}
+    {eval_board(game_state, color), nil}
   end
 
-  defp minimax(board, depth, alpha, beta, is_max_player, k) do
-    moves = get_moves(board, k, is_max_player)
+  defp minimax(game_state, depth, alpha, beta, is_max_player, k) do
+    moves = get_moves(game_state, k, is_max_player)
     best_move = nil
 
     depth =
@@ -50,8 +50,8 @@ defmodule ElixirconfChess.AI do
     eval_fn =
       if is_max_player do
         fn move, alpha, best_move ->
-          board_with_move = GameBoard.move(board, move)
-          {evaluation, _} = minimax(board_with_move, depth - 1, alpha, beta, false, k)
+          board_with_move = GameBoard.move(game_state, move)
+          {evaluation, _} = minimax(%{ game_state | board: board_with_move }, depth - 1, alpha, beta, false, k)
           new_alpha = if evaluation > alpha, do: evaluation, else: alpha
           new_best_move = if evaluation > alpha, do: move, else: best_move
 
@@ -63,8 +63,8 @@ defmodule ElixirconfChess.AI do
         end
       else
         fn move, beta, best_move ->
-          board_with_move = GameBoard.move(board, move)
-          {evaluation, _} = minimax(board_with_move, depth - 1, alpha, beta, true, k)
+          board_with_move = GameBoard.move(game_state, move)
+          {evaluation, _} = minimax(%{ game_state | board: board_with_move }, depth - 1, alpha, beta, true, k)
           new_beta = if evaluation < beta, do: evaluation, else: beta
           new_best_move = if evaluation < beta, do: move, else: best_move
 
@@ -86,9 +86,9 @@ defmodule ElixirconfChess.AI do
     {value, best_move}
   end
 
-  defp get_moves(board, k, current_player) do
+  defp get_moves(game_state, k, current_player) do
     current_player = if current_player, do: :white, else: :black
-    {input, valid_moves_idx} = board_to_input(board, current_player)
+    {input, valid_moves_idx} = board_to_input(game_state, current_player)
 
     if valid_moves_idx == [] do
       []
@@ -108,8 +108,8 @@ defmodule ElixirconfChess.AI do
     end
   end
 
-  defp eval_board(board, current_player) do
-    case GameBoard.game_state(board) do
+  defp eval_board(game_state, current_player) do
+    case GameBoard.game_state(game_state) do
       :draw ->
         0
 
@@ -119,8 +119,8 @@ defmodule ElixirconfChess.AI do
       {:checkmate, :black} ->
         -20
 
-      :active ->
-        {%{"board" => board}, _} = board_to_input(board, current_player)
+      {:active, _} ->
+        {%{"board" => board}, _} = board_to_input(game_state, current_player)
 
         Nx.Serving.batched_run(ChessAI.EvaluatorServing, Nx.Batch.stack([%{"board" => board}]), &Nx.backend_transfer/1)
         |> Nx.reshape({})
@@ -270,7 +270,7 @@ defmodule ElixirconfChess.AI do
     |> Axon.nx(&Nx.multiply(&1, 20.0))
   end
 
-  def board_to_input(board, current_player) do
+  def board_to_input(%{ board: board } = game_state, current_player) do
     pieces_by_kind =
       board
       |> all_pieces()
@@ -301,10 +301,10 @@ defmodule ElixirconfChess.AI do
       end)
 
     moves_idx =
-      board
+      game_state
       |> GameBoard.possible_moves(current_player, true)
       |> Enum.map(fn %{source: {source_col, source_row}, destination: {dest_col, dest_row}} ->
-        move = Move.new({source_col, source_row}, {dest_col, dest_row})
+        move = Move.new(game_state, {source_col, source_row}, {dest_col, dest_row})
         move_to_index(move)
       end)
 

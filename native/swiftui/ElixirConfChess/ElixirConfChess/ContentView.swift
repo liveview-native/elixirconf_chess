@@ -58,7 +58,3 @@ enum ChessRegistry: RootRegistry {
         ProgressView()
     }
 }
-
-#Preview {
-    ContentView()
-}

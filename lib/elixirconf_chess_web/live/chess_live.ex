@@ -83,7 +83,7 @@ defmodule ElixirconfChessWeb.ChessLive do
         </ToolbarItem>
       </Group>
 
-      <.player_chip color={:black} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
+      <.player_chip game_state={@game_state} color={:black} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
         <%= if @player_color == :white, do: "Opponent", else: "You" %>
       </.player_chip>
 
@@ -97,7 +97,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
       <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
 
-      <.player_chip color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
+      <.player_chip game_state={@game_state} color={:white} turn={@game_state.turn} board={@game_state.board} platform_id={:swiftui}>
         <%= if @player_color == :white, do: "You", else: "Opponent" %>
       </.player_chip>
 
