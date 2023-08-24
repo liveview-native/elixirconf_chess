@@ -130,7 +130,7 @@ defmodule ElixirconfChess.Game do
     game_state_status = GameBoard.game_state(game_state)
 
     move_history = [GameBoard.Move.new(state.game_state, selection, new_position, true) | game_state.move_history]
-    game_state = %GameState{game_state | state: game_state_status, board: board, turn: other_turn(game_state.turn), move_history: move_history}
+    game_state = %GameState{game_state | state: game_state_status, turn: other_turn(game_state.turn), move_history: move_history}
     %{state | game_state: game_state}
   end
 
