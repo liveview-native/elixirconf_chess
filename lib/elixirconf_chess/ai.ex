@@ -4,6 +4,7 @@ defmodule ElixirconfChess.AI do
   """
 
   alias ElixirconfChess.GameBoard
+  alias ElixirconfChess.GameState
   alias ElixirconfChess.GameBoard.Move
 
   @piece_layers [
@@ -24,7 +25,9 @@ defmodule ElixirconfChess.AI do
   @minimax_depth 4
   @top_k_moves 2
 
-  def choose_move(game_state, current_player, depth \\ @minimax_depth, k \\ @top_k_moves) do
+  def choose_move(game_state, current_player, depth \\ @minimax_depth, k \\ @top_k_moves)
+
+  def choose_move(%GameState{state: {:active, _}} = game_state, current_player, depth, k) do
     {eval, %Move{source: {sx, sy}, destination: {dx, dy}}} =
       minimax(game_state, depth, -100, 100, current_player == :white, k)
 
@@ -51,7 +54,7 @@ defmodule ElixirconfChess.AI do
       if is_max_player do
         fn move, alpha, best_move ->
           board_with_move = GameBoard.move(game_state, move)
-          {evaluation, _} = minimax(%{ game_state | board: board_with_move }, depth - 1, alpha, beta, false, k)
+          {evaluation, _} = minimax(%{game_state | board: board_with_move}, depth - 1, alpha, beta, false, k)
           new_alpha = if evaluation > alpha, do: evaluation, else: alpha
           new_best_move = if evaluation > alpha, do: move, else: best_move
 
@@ -64,7 +67,7 @@ defmodule ElixirconfChess.AI do
       else
         fn move, beta, best_move ->
           board_with_move = GameBoard.move(game_state, move)
-          {evaluation, _} = minimax(%{ game_state | board: board_with_move }, depth - 1, alpha, beta, true, k)
+          {evaluation, _} = minimax(%{game_state | board: board_with_move}, depth - 1, alpha, beta, true, k)
           new_beta = if evaluation < beta, do: evaluation, else: beta
           new_best_move = if evaluation < beta, do: move, else: best_move
 
@@ -270,7 +273,7 @@ defmodule ElixirconfChess.AI do
     |> Axon.nx(&Nx.multiply(&1, 20.0))
   end
 
-  def board_to_input(%{ board: board } = game_state, current_player) do
+  def board_to_input(%{board: board} = game_state, current_player) do
     pieces_by_kind =
       board
       |> all_pieces()
