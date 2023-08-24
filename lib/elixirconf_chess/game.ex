@@ -40,6 +40,9 @@ defmodule ElixirconfChess.Game do
     {:ok, %{id: id, game_state: %GameState{}}}
   end
 
+  def handle_info(:ai_tick, %{game_state: %GameState{state: {:checkmate, _}}} = state), do: {:noreply, state}
+  def handle_info(:ai_tick, %{game_state: %GameState{state: {:checkmate, _}}} = state), do: {:noreply, state}
+
   def handle_info(:ai_tick, state) do
     {_eval, move} =
       case state.game_state do
@@ -67,6 +70,7 @@ defmodule ElixirconfChess.Game do
     case state.game_state.state do
       {:active, _} ->
         ai_tick()
+
       _ ->
         nil
     end
@@ -122,9 +126,11 @@ defmodule ElixirconfChess.Game do
 
   defp update_game_with_move(state, selection, new_position) do
     board = GameBoard.move(state.game_state, selection, new_position)
-    game_state_status = GameBoard.game_state(state.game_state)
-    move_history = [GameBoard.Move.new(state.game_state, selection, new_position, true) | state.game_state.move_history]
-    game_state = %GameState{state.game_state | state: game_state_status, board: board, turn: other_turn(state.game_state.turn), move_history: move_history}
+    game_state = %GameState{state.game_state | board: board}
+    game_state_status = GameBoard.game_state(game_state)
+
+    move_history = [GameBoard.Move.new(state.game_state, selection, new_position, true) | game_state.move_history]
+    game_state = %GameState{game_state | state: game_state_status, turn: other_turn(game_state.turn), move_history: move_history}
     %{state | game_state: game_state}
   end
 

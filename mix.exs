@@ -46,9 +46,8 @@ defmodule ElixirconfChess.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:live_view_native, "~> 0.0.8"},
       {:live_view_native_swift_ui, "~> 0.0.9"},
-      {:axon, github: "elixir-nx/axon"},
-      {:nx, github: "elixir-nx/nx", sparse: "nx", override: true},
-      {:exla, github: "elixir-nx/nx", sparse: "exla"}
+      {:axon, "~> 0.6"},
+      {:exla, "~> 0.6"}
     ]
   end
 
