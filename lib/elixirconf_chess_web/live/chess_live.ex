@@ -154,10 +154,11 @@ defmodule ElixirconfChessWeb.ChessLive do
       <div :if={@loading} class="w-full flex flex-col items-center">
         Loading
       </div>
-      <div class="py-2 px-4 text-sm font-bold w-fit mx-auto rounded-full text-white" style={"background-color: #{ElixirconfChessWeb.Colors.web(:odd_background)};"}>
-        <%= ElixirconfChess.GameState.description(@game_state) %>
-      </div>
       <div :if={!@loading} class="w-full flex flex-col items-center">
+        <div class="py-2 px-4 text-sm font-bold w-fit mx-auto rounded-full text-white" style={"background-color: #{ElixirconfChessWeb.Colors.web(:odd_background)};"}>
+          <%= ElixirconfChess.GameState.description(@game_state) %>
+        </div>
+
         <.player_chip
           game_state={@game_state}
           color={:black}
