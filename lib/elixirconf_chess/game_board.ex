@@ -155,7 +155,7 @@ defmodule ElixirconfChess.GameBoard do
   }
 
   # def start_board, do: @near_checkmate_board
-  def start_board, do: @start_board
+  def start_board, do: @near_castling_board
 
   def x_range, do: 0..7
   def y_range, do: 0..7
@@ -228,6 +228,32 @@ defmodule ElixirconfChess.GameBoard do
     )
   end
 
+  def locate(board, {_turn, _piece, _id} = value) do
+    Enum.reduce(
+      board,
+      nil,
+      fn {y, row}, acc ->
+        row_match =
+          Enum.reduce(
+            row,
+            nil,
+            fn
+              {x, ^value}, _ -> {x, y}
+              _, acc -> acc
+            end
+          )
+
+        case row_match do
+          nil ->
+            acc
+
+          value ->
+            value
+        end
+      end
+    )
+  end
+
   def is_enemy?(turn, board, position) do
     case value(board, position) do
       {^turn, _, _} ->
@@ -264,7 +290,7 @@ defmodule ElixirconfChess.GameBoard do
         _ ->
           false
       end
-    )
+    ) and locate(state.board, value) != nil
   end
 
   def can_castle_left?(state, :black = turn),
@@ -278,8 +304,8 @@ defmodule ElixirconfChess.GameBoard do
     do: !has_moved_piece?(state, {turn, :king, 29}) and !has_moved_piece?(state, {turn, :rook, 32})
 
   def castling_rook({:black, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == -2, do: {{0, 0}, {:black, :rook, 1}}
-  def castling_rook({:black, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == 2, do: {{7, 0}, {:black, :rook, 25}}
-  def castling_rook({:white, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == -2, do: {{0, 7}, {:white, :rook, 8}}
+  def castling_rook({:black, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == 2, do: {{7, 0}, {:black, :rook, 8}}
+  def castling_rook({:white, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == -2, do: {{0, 7}, {:white, :rook, 25}}
   def castling_rook({:white, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == 2, do: {{7, 7}, {:white, :rook, 32}}
   def castling_rook(_value, _origin, _destination), do: nil
 

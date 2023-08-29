@@ -311,6 +311,7 @@ defmodule ElixirconfChessWeb.ChessLive do
               cond do
                 Enum.member?(valid_moves, new_position) ->
                   if GameBoard.is_promotion?(GameBoard.value(socket.assigns.game_state.board, selection), new_position) and socket.assigns.promotion_type == nil do
+                    dbg new_position
                     assign(socket, :show_promotion_picker, new_position)
                   else
                     Game.move(socket.assigns.game_id, selection, new_position, socket.assigns.promotion_type)

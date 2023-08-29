@@ -44,8 +44,8 @@ defmodule ElixirconfChess.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:live_view_native, "~> 0.0.8"},
-      {:live_view_native_swift_ui, "~> 0.0.9"},
+      {:live_view_native, "~> 0.0.9-rc.2"},
+      {:live_view_native_swift_ui, "~> 0.0.10-rc.1"},
       {:axon, "~> 0.6"},
       {:exla, "~> 0.6"}
     ]
