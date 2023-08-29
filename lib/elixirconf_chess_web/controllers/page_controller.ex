@@ -6,4 +6,8 @@ defmodule ElixirconfChessWeb.PageController do
     # so skip the default app layout.
     render(conn, :home, layout: false)
   end
+
+  def privacy(conn, _params) do
+    html(conn, File.read!("lib/elixirconf_chess_web/controllers/page_html/privacy-policy.html"))
+  end
 end
