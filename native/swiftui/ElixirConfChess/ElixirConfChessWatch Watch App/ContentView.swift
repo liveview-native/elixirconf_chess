@@ -13,7 +13,3 @@ struct ContentView: View {
         LiveView(.localhost)
     }
 }
-
-#Preview {
-    ContentView()
-}
