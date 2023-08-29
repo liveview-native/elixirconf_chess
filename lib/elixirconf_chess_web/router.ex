@@ -20,7 +20,7 @@ defmodule ElixirconfChessWeb.Router do
     live "/", IndexLive
     live "/game/:id", ChessLive
 
-    get "/privacy", PageController, :privacy
+    get "/privacy-policy", PageController, :privacy
   end
 
   # Other scopes may use custom stacks.
