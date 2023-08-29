@@ -43,7 +43,7 @@ defmodule ElixirconfChessWeb.IndexLive do
     ~H"""
     <div class="max-w-md mx-auto flex flex-col items-center gap-2 px-2">
       <p class="text-5xl font-bold my-4">Chess</p>
-      <button phx-click="create" style={"background-color: #{background_color(map_size(@games), :web)};"} class="p-2 font-bold rounded w-full">
+      <button phx-click="create" style={"background-color: #{background_color(-1, :web)};"} class="p-2 font-bold rounded w-full">
         ＋ Create Game
       </button>
       <hr class="border w-full my-4" />
