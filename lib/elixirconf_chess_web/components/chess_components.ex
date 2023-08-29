@@ -103,6 +103,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
   attr :turn, :any
   attr :board, :any
   attr :platform_id, :any
+  attr :can_add_ai_opponent, :boolean
   slot :inner_block
 
   def player_chip(%{platform_id: :swiftui} = assigns) do
@@ -129,7 +130,14 @@ defmodule ElixirconfChessWeb.ChessComponents do
           fn {_, type, id} -> {id, GameBoard.piece(type)} end
         )
       %>
-      <ScrollView axes="horizontal" modifiers={font(font: {:system, :large_title}) |> foreground_style({:color, GameBoard.enemy(@color)})}>
+      <ScrollView
+        axes="horizontal"
+        modifiers={
+          font(font: {:system, :large_title})
+          |> foreground_style({:color, GameBoard.enemy(@color)})
+          |> overlay(alignment: :trailing, content: :ai_opponent)
+        }
+      >
         <HStack>
           <Text
             :for={{id, image} <- captures}
@@ -137,8 +145,59 @@ defmodule ElixirconfChessWeb.ChessComponents do
             verbatim={image}
           />
         </HStack>
+
+        <Group template={:ai_opponent}>
+          <Button
+            :if={@can_add_ai_opponent and Map.get(@game_state, @color) == nil}
+            phx-click="add_ai_opponent"
+            modifiers={
+              padding(8)
+              |> background(Colors.swiftui(if @turn == @color, do: :even_background, else: :odd_background), in: {:rounded_rectangle, radius: 6})
+              |> padding(:trailing, 8)
+            }
+          >
+            <Label system-image="play.desktopcomputer">
+              Play against Nx
+            </Label>
+          </Button>
+        </Group>
       </ScrollView>
     </HStack>
+    """
+  end
+
+  def player_chip(%{platform_id: :web} = assigns) do
+    ~SWIFTUI"""
+    <div class={"w-full flex flex-row my-2 py-2 px-4 rounded-md " <> if(GameBoard.in_check?(@game_state, @color), do: "border-4 border-rose-500", else: "")} style={"background-color: #{Colors.web(if @turn == @color, do: :odd_background, else: :even_background)}"}>
+      <div class="flex flex-col">
+        <p class="text-md font-bold"><%= render_slot(@inner_block) %></p>
+        <p class="text-sm"><%= @color |> Atom.to_string() |> String.capitalize() %></p>
+      </div>
+      <%
+        captures = Enum.map(
+          GameBoard.captures(@board, @color),
+          fn {_, type, id} -> {id, GameBoard.piece(type)} end
+        )
+      %>
+      <%= if @can_add_ai_opponent and Map.get(@game_state, @color) == nil do %>
+        <div class="flex-grow"></div>
+        <button
+          phx-click="add_ai_opponent"
+          class="py-2 px-4 rounded-md font-bold"
+          style={"background-color: #{Colors.web(if @turn == @color, do: :even_background, else: :odd_background)}"}
+        >
+          Play against Nx
+        </button>
+      <% else %>
+        <div class="overflow-x-scroll text-3xl flex-grow">
+          <div class="flex flex-row px-4 gap-4">
+            <p :for={{id, image} <- captures} id={"#{id}"}>
+              <%= image %>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
     """
   end
 
