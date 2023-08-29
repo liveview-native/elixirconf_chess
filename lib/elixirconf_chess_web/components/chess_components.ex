@@ -44,10 +44,28 @@ defmodule ElixirconfChessWeb.ChessComponents do
         selection ->
           GameBoard.possible_moves(@game_state, selection) |> Enum.map(& &1.destination)
       end %>
-    <div class="grid grid-cols-8 grid-rows-8 max-w-2xl w-full aspect-square rounded-lg overflow-hidden" style="font-family: Arial;">
-      <%= for y <- GameBoard.y_range do %>
-        <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} native={@native} platform_id={:web} />
-      <% end %>
+    <div class="relative max-w-2xl aspect-square w-full rounded-lg overflow-hidden">
+      <div class="absolute grid grid-cols-8 grid-rows-8 w-full h-full" style="font-family: Arial;">
+        <%
+          sorted_pieces = Enum.reduce(@board, [], fn {y, row}, acc -> acc ++ Enum.map(row, fn {x, piece} -> {{x, y}, piece} end) end)
+            |> Enum.sort_by(fn {_, {_, _, id}} -> id end)
+        %>
+        <.tile_piece
+          :for={{{x, y}, value} <- sorted_pieces}
+          x={x}
+          y={y}
+          board={@board}
+          selection={@selection}
+          moves={moves}
+          native={@native}
+          platform_id={:web}
+        />
+      </div>
+      <div class="grid grid-cols-8 grid-rows-8 w-full h-full">
+        <%= for y <- GameBoard.y_range do %>
+          <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} native={@native} platform_id={:web} />
+        <% end %>
+      </div>
     </div>
     """
   end
@@ -90,11 +108,27 @@ defmodule ElixirconfChessWeb.ChessComponents do
       <% {color, image, _} = GameBoard.piece(@board, {@x, @y}) %>
       <div class="relative w-full h-full flex justify-center items-center">
         <div class="absolute w-full h-full" style={"background-color: #{overlay_color(@selection, @moves, {@x, @y}) |> Colors.web};"}></div>
+      </div>
+    </button>
+    """
+  end
+
+  def tile_piece(%{ platform_id: :web } = assigns) do
+    ~H"""
+    <%
+      {color, image, id} = GameBoard.piece(@board, {@x, @y})
+    %>
+    <div
+      id={to_string(id)}
+      style={"left: #{(@x / 8) * 100}%; top: #{(@y / 8) * 100}%; width: 12.5%; height: 12.5%;"}
+      class="absolute aspect-square flex overflow-clip transition-all pointer-events-none"
+    >
+      <div class="relative w-full h-full flex justify-center items-center">
         <p class={"text-5xl text-center z-10 " <> (if color == :white, do: "text-white", else: "text-black")}>
           <%= image %>
         </p>
       </div>
-    </button>
+    </div>
     """
   end
 
