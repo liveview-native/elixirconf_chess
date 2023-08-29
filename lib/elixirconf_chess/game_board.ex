@@ -120,6 +120,39 @@ defmodule ElixirconfChess.GameBoard do
       7 => {:black, :king, 3},
     }
   }
+  @near_castling_board %{
+    0 => %{
+      0 => {:black, :rook, 1},
+      4 => {:black, :king, 5},
+      7 => {:black, :rook, 8}
+    },
+    1 => %{
+      0 => {:black, :pawn, 9},
+      1 => {:black, :pawn, 10},
+      2 => {:black, :pawn, 11},
+      3 => {:black, :pawn, 12},
+      4 => {:black, :pawn, 13},
+      5 => {:black, :pawn, 14},
+      6 => {:black, :pawn, 15},
+      7 => {:black, :pawn, 16}
+    },
+    # ...
+    6 => %{
+      0 => {:white, :pawn, 17},
+      1 => {:white, :pawn, 18},
+      2 => {:white, :pawn, 19},
+      3 => {:white, :pawn, 20},
+      4 => {:white, :pawn, 21},
+      5 => {:white, :pawn, 22},
+      6 => {:white, :pawn, 23},
+      7 => {:white, :pawn, 24}
+    },
+    7 => %{
+      0 => {:white, :rook, 25},
+      4 => {:white, :king, 29},
+      7 => {:white, :rook, 32}
+    }
+  }
 
   # def start_board, do: @near_checkmate_board
   def start_board, do: @start_board
@@ -218,6 +251,37 @@ defmodule ElixirconfChess.GameBoard do
   def is_promotion?({:white, :pawn, _}, {_, 0}), do: true
   def is_promotion?({:black, :pawn, _}, {_, 7}), do: true
   def is_promotion?(_value, _position), do: false
+
+  def is_castling?({_, :king, _}, {prev_x, _prev_y}, {x, _y}) when abs(x - prev_x) == 2, do: true
+  def is_castling?(_value, _source, _destination), do: false
+
+  def has_moved_piece?(state, value) do
+    Enum.any?(
+      state.move_history,
+      fn
+        %{ value: ^value } ->
+          true
+        _ ->
+          false
+      end
+    )
+  end
+
+  def can_castle_left?(state, :black = turn),
+    do: !has_moved_piece?(state, {turn, :king, 5}) and !has_moved_piece?(state, {turn, :rook, 1})
+  def can_castle_left?(state, :white = turn),
+    do: !has_moved_piece?(state, {turn, :king, 29}) and !has_moved_piece?(state, {turn, :rook, 25})
+
+  def can_castle_right?(state, :black = turn),
+    do: !has_moved_piece?(state, {turn, :king, 5}) and !has_moved_piece?(state, {turn, :rook, 8})
+  def can_castle_right?(state, :white = turn),
+    do: !has_moved_piece?(state, {turn, :king, 29}) and !has_moved_piece?(state, {turn, :rook, 32})
+
+  def castling_rook({:black, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == -2, do: {{0, 0}, {:black, :rook, 1}}
+  def castling_rook({:black, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == 2, do: {{7, 0}, {:black, :rook, 25}}
+  def castling_rook({:white, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == -2, do: {{0, 7}, {:white, :rook, 8}}
+  def castling_rook({:white, :king, _}, {prev_x, _prev_y}, {x, _y}) when x - prev_x == 2, do: {{7, 7}, {:white, :rook, 32}}
+  def castling_rook(_value, _origin, _destination), do: nil
 
   def enemy(:white), do: :black
   def enemy(:black), do: :white
@@ -352,7 +416,7 @@ defmodule ElixirconfChess.GameBoard do
     |> Enum.map(&Move.new(state, source, &1))
   end
 
-  defp do_possible_moves(state, {x, y} = source, {turn, :king, _}) do
+  defp do_possible_moves(%{ board: board } = state, {x, y} = source, {turn, :king, _}) do
     moves = [
       {x - 1, y},
       {x - 1, y + 1},
@@ -364,7 +428,28 @@ defmodule ElixirconfChess.GameBoard do
       {x, y + 1}
     ]
 
-    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, state.board, p), do: p
+    moves = for p <- moves, is_on_board?(p) and !is_self?(turn, board, p), do: p
+
+    moves = if can_castle_left?(state, turn) do
+      case {value(board, {x - 1, y}), value(board, {x - 2, y})} do
+        {nil, nil} ->
+          [{x - 2, y} | moves]
+        {_, _} ->
+          moves
+      end
+    else
+      moves
+    end
+    moves = if can_castle_right?(state, turn) do
+      case {value(board, {x + 1, y}), value(board, {x + 2, y})} do
+        {nil, nil} ->
+          [{x + 2, y} | moves]
+        {_, _} ->
+          moves
+      end
+    else
+      moves
+    end
 
     Enum.map(moves, &Move.new(state, source, &1))
   end
@@ -433,6 +518,16 @@ defmodule ElixirconfChess.GameBoard do
           Map.get_and_update(board, origin_y, fn row -> {row, Map.drop(row, [x])} end) |> elem(1)
         else
           board
+        end
+      {_, :king, _} ->
+        case castling_rook(piece, origin, destination) do
+          nil ->
+            board
+          {{rook_origin_x, rook_origin_y}, rook_piece} ->
+            # remove the rook from its old position
+            board = Map.get_and_update(board, rook_origin_y, fn row -> {row, Map.drop(row, [rook_origin_x])} end) |> elem(1)
+            # put the piece in its new position
+            Map.get_and_update(board, y, fn row -> {row, Map.put(row, x - div(x - origin_x, 2), rook_piece)} end) |> elem(1)
         end
       _ ->
         board
