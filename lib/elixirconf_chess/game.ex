@@ -30,8 +30,8 @@ defmodule ElixirconfChess.Game do
     GenServer.call(name(id), :get_game_state)
   end
 
-  def move(id, selection, new_position) do
-    GenServer.call(name(id), {:move, selection, new_position})
+  def move(id, selection, new_position, promotion_type) do
+    GenServer.call(name(id), {:move, selection, new_position, promotion_type})
   end
 
   def init(%{id: id}) do
@@ -59,7 +59,7 @@ defmodule ElixirconfChess.Game do
     state =
       case move do
         %{source: source, destination: destination} ->
-          state = update_game_with_move(state, source, destination)
+          state = update_game_with_move(state, source, destination, :queen)
           PubSub.broadcast_game(state.id, state.game_state)
           state
 
@@ -109,14 +109,14 @@ defmodule ElixirconfChess.Game do
     {:reply, state.game_state, state}
   end
 
-  def handle_call({:move, selection, new_position}, {from, _}, state) do
+  def handle_call({:move, selection, new_position, promotion_type}, {from, _}, state) do
     case state.game_state do
       %GameState{turn: :white, white: ^from} -> true
       %GameState{turn: :black, black: ^from} -> true
       _ -> false
     end
     |> if do
-      state = update_game_with_move(state, selection, new_position)
+      state = update_game_with_move(state, selection, new_position, promotion_type)
       PubSub.broadcast_game(state.id, state.game_state)
       {:reply, :ok, state}
     else
@@ -124,8 +124,8 @@ defmodule ElixirconfChess.Game do
     end
   end
 
-  defp update_game_with_move(state, selection, new_position) do
-    board = GameBoard.move(state.game_state, selection, new_position)
+  defp update_game_with_move(state, selection, new_position, promotion_type) do
+    board = GameBoard.move(state.game_state, selection, new_position, promotion_type)
     game_state = %GameState{state.game_state | board: board}
     game_state_status = GameBoard.game_state(game_state)
 

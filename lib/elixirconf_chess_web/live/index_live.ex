@@ -41,16 +41,23 @@ defmodule ElixirconfChessWeb.IndexLive do
 
   def render(assigns) do
     ~H"""
-    <div class="w-full flex flex-col items-center gap-2">
-      <p class="text-5xl font-bold">Chess</p>
+    <div class="max-w-md mx-auto flex flex-col items-center gap-2 px-2">
+      <p class="text-5xl font-bold my-4">Chess</p>
+      <button phx-click="create" style={"background-color: #{background_color(map_size(@games), :web)};"} class="p-2 font-bold rounded w-full">
+        ＋ Create Game
+      </button>
+      <hr class="border w-full my-4" />
       <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
-        <button phx-click="join" phx-value-id={game_id} phx-value-ai={:player} style={"background-color: #{background_color(index, :web)};"} class="p-2 font-bold text-white rounded">
-          Join Game
+        <button phx-click="join" phx-value-id={game_id} phx-value-ai={:player} style={"background-color: #{background_color(index, :web)};"} class="p-2 text-white rounded w-full text-left flex flex-row gap-2">
+          <p>▶</p>
+          <div class="flex flex-col">
+            <p class="font-bold">Join Game</p>
+            <p class="text-sm opacity-50">
+              <%= String.slice(game_id, 0..3) |> String.upcase() %>
+            </p>
+          </div>
         </button>
       <% end %>
-      <button phx-click="create" style={"background-color: #{background_color(map_size(@games), :web)};"} class="p-2 font-bold rounded">
-        Create Game
-      </button>
     </div>
     """
   end
