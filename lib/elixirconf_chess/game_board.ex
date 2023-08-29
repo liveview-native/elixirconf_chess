@@ -269,9 +269,10 @@ defmodule ElixirconfChess.GameBoard do
 
   def is_on_board?({x, y}), do: x >= 0 and y >= 0 and x <= 7 and y <= 7
 
-  def is_en_passant?(%{ move_history: [%{ value: {prev_turn, :pawn, _}, source: {_prev_x, prev_y}, destination: {prev_dest_x, prev_dest_y} } | _] }, {x, _y}, turn)
-    when (abs(prev_y - prev_dest_y) == 2) and prev_turn != turn and prev_dest_x == x,
-    do: true
+  def is_en_passant?(%{ move_history: [%{ value: {prev_turn, :pawn, _}, source: {_prev_x, prev_y}, destination: {prev_dest_x, prev_dest_y} } | _] }, {x, y}, :white = turn)
+    when (abs(prev_y - prev_dest_y) == 2) and prev_turn != turn and prev_dest_x == x and prev_dest_y == y + 1, do: true
+  def is_en_passant?(%{ move_history: [%{ value: {prev_turn, :pawn, _}, source: {_prev_x, prev_y}, destination: {prev_dest_x, prev_dest_y} } | _] }, {x, y}, :black = turn)
+    when (abs(prev_y - prev_dest_y) == 2) and prev_turn != turn and prev_dest_x == x and prev_dest_y == y - 1, do: true
   def is_en_passant?(_state, _position, _turn), do: false
 
   def is_promotion?({:white, :pawn, _}, {_, 0}), do: true

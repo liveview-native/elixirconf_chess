@@ -102,7 +102,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
         can_add_ai_opponent={@can_add_ai_opponent}
       >
-        <%= if(@player_color == :white, do: if(@game_state.black_is_ai, do: "Nx", else: "Opponent"), else: "You") %>
+        <%= chip_label(:black, @player_color, @game_state) %>
       </.player_chip>
 
       <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
@@ -116,7 +116,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
         can_add_ai_opponent={@can_add_ai_opponent}
       >
-        <%= if(@player_color == :white, do: "You", else: if(@game_state.white_is_ai, do: "Nx", else: "Opponent")) %>
+        <%= chip_label(:white, @player_color, @game_state) %>
       </.player_chip>
 
       <Spacer />
@@ -168,7 +168,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
           can_add_ai_opponent={@can_add_ai_opponent}
         >
-          <%= if(@player_color == :white, do: if(@game_state.black_is_ai, do: "Nx", else: "Opponent"), else: "You") %>
+          <%= chip_label(:black, @player_color, @game_state) %>
         </.player_chip>
 
         <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:web} native={@native} />
@@ -182,7 +182,7 @@ defmodule ElixirconfChessWeb.ChessLive do
 
           can_add_ai_opponent={@can_add_ai_opponent}
         >
-          <%= if(@player_color == :white, do: "You", else: if(@game_state.white_is_ai, do: "Nx", else: "Opponent")) %>
+          <%= chip_label(:white, @player_color, @game_state) %>
         </.player_chip>
 
         <p class="opacity-50 w-full text-left mt-4">Moves</p>
@@ -342,4 +342,11 @@ defmodule ElixirconfChessWeb.ChessLive do
 
   def background_color(_index, platform),
     do: ElixirconfChessWeb.Colors.evaluate(:even_background, platform)
+
+  def chip_label(color, :spectator, _game_state), do: color |> Atom.to_string() |> String.capitalize()
+  def chip_label(chip, color, _game_state) when chip == color, do: "You"
+  def chip_label(:white = chip, color, %{ white_is_ai: false }) when chip != color, do: "Opponent"
+  def chip_label(:black = chip, color, %{ black_is_ai: false }) when chip != color, do: "Opponent"
+  def chip_label(:white = chip, color, %{ white_is_ai: true }) when chip != color, do: "Nx"
+  def chip_label(:black = chip, color, %{ black_is_ai: true }) when chip != color, do: "Nx"
 end
