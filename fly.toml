@@ -11,7 +11,7 @@ swap_size_mb = 512
 [build]
 
 [env]
-  PHX_HOST = "elixirconf-chess.fly.dev"
+  PHX_HOST = "chess.dockyard.com"
   PORT = "8080"
 
 [http_service]
