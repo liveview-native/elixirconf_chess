@@ -556,7 +556,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/liveview-native/liveview-client-swiftui";
 			requirement = {
-				branch = "background-app-disconnect";
+				branch = main;
 				kind = branch;
 			};
 		};

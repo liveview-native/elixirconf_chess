@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/liveview-native/liveview-client-swiftui",
       "state" : {
-        "branch" : "background-app-disconnect",
-        "revision" : "c42a817ca1827227217a36285c39ca1efa7c46cf"
+        "branch" : "main",
+        "revision" : "f5f30c9ec42448ee2f6357b163155a2d00170233"
       }
     },
     {
