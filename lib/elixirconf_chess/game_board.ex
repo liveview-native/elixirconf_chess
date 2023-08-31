@@ -89,70 +89,70 @@ defmodule ElixirconfChess.GameBoard do
   # }
 
   # for dev
-  @en_passant_board %{
-    1 => %{
-      1 => {:black, :pawn, 1},
-      3 => {:black, :pawn, 2},
-    },
-    3 => %{
-      0 => {:white, :pawn, 3},
-      2 => {:white, :pawn, 4},
-    },
-    4 => %{
-      0 => {:black, :pawn, 9},
-      2 => {:black, :pawn, 10},
-    },
-    # ...
-    6 => %{
-      1 => {:white, :pawn, 18},
-      3 => {:white, :pawn, 19},
-    }
-  }
-  @near_promotion_board %{
-    1 => %{
-      0 => {:white, :pawn, 1}
-    },
-    6 => %{
-      3 => {:black, :pawn, 4},
-    },
-    7 => %{
-      0 => {:white, :king, 2},
-      7 => {:black, :king, 3},
-    }
-  }
-  @near_castling_board %{
-    0 => %{
-      0 => {:black, :rook, 1},
-      4 => {:black, :king, 5},
-      7 => {:black, :rook, 8}
-    },
-    1 => %{
-      0 => {:black, :pawn, 9},
-      1 => {:black, :pawn, 10},
-      2 => {:black, :pawn, 11},
-      3 => {:black, :pawn, 12},
-      4 => {:black, :pawn, 13},
-      5 => {:black, :pawn, 14},
-      6 => {:black, :pawn, 15},
-      7 => {:black, :pawn, 16}
-    },
-    # ...
-    6 => %{
-      0 => {:white, :pawn, 17},
-      1 => {:white, :pawn, 18},
-      2 => {:white, :pawn, 19},
-      3 => {:white, :pawn, 20},
-      4 => {:white, :pawn, 21},
-      5 => {:white, :pawn, 22},
-      6 => {:white, :pawn, 23},
-      7 => {:white, :pawn, 24}
-    },
-    7 => %{
-      0 => {:white, :rook, 25},
-      4 => {:white, :king, 29},
-      7 => {:white, :rook, 32}
-    }
-  }
+  # @en_passant_board %{
+  #   1 => %{
+  #     1 => {:black, :pawn, 1},
+  #     3 => {:black, :pawn, 2},
+  #   },
+  #   3 => %{
+  #     0 => {:white, :pawn, 3},
+  #     2 => {:white, :pawn, 4},
+  #   },
+  #   4 => %{
+  #     0 => {:black, :pawn, 9},
+  #     2 => {:black, :pawn, 10},
+  #   },
+  #   # ...
+  #   6 => %{
+  #     1 => {:white, :pawn, 18},
+  #     3 => {:white, :pawn, 19},
+  #   }
+  # }
+  # @near_promotion_board %{
+  #   1 => %{
+  #     0 => {:white, :pawn, 1}
+  #   },
+  #   6 => %{
+  #     3 => {:black, :pawn, 4},
+  #   },
+  #   7 => %{
+  #     0 => {:white, :king, 2},
+  #     7 => {:black, :king, 3},
+  #   }
+  # }
+  # @near_castling_board %{
+  #   0 => %{
+  #     0 => {:black, :rook, 1},
+  #     4 => {:black, :king, 5},
+  #     7 => {:black, :rook, 8}
+  #   },
+  #   1 => %{
+  #     0 => {:black, :pawn, 9},
+  #     1 => {:black, :pawn, 10},
+  #     2 => {:black, :pawn, 11},
+  #     3 => {:black, :pawn, 12},
+  #     4 => {:black, :pawn, 13},
+  #     5 => {:black, :pawn, 14},
+  #     6 => {:black, :pawn, 15},
+  #     7 => {:black, :pawn, 16}
+  #   },
+  #   # ...
+  #   6 => %{
+  #     0 => {:white, :pawn, 17},
+  #     1 => {:white, :pawn, 18},
+  #     2 => {:white, :pawn, 19},
+  #     3 => {:white, :pawn, 20},
+  #     4 => {:white, :pawn, 21},
+  #     5 => {:white, :pawn, 22},
+  #     6 => {:white, :pawn, 23},
+  #     7 => {:white, :pawn, 24}
+  #   },
+  #   7 => %{
+  #     0 => {:white, :rook, 25},
+  #     4 => {:white, :king, 29},
+  #     7 => {:white, :rook, 32}
+  #   }
+  # }
 
   # def start_board, do: @near_checkmate_board
   def start_board, do: @start_board

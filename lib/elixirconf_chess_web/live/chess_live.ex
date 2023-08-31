@@ -52,8 +52,8 @@ defmodule ElixirconfChessWeb.ChessLive do
     ~SWIFTUI"""
     <ScrollView
       modifiers={
-        navigation_title(title: ElixirconfChess.GameState.description(@game_state))
-        |> navigation_bar_title_display_mode(display_mode: :inline)
+        navigation_title(ElixirconfChess.GameState.description(@game_state))
+        |> navigation_bar_title_display_mode(:inline)
       }
     >
       <VStack alignment="leading">
@@ -92,10 +92,10 @@ defmodule ElixirconfChessWeb.ChessLive do
     <VStack
       alignment="leading"
       modifiers={
-        navigation_title(title: "Chess")
+        navigation_title("Chess")
         |> toolbar(content: :toolbar)
-        |> padding([])
-        |> animation(animation: :default, value: Atom.to_string(@game_state.turn))
+        |> padding()
+        |> animation(:default, value: Atom.to_string(@game_state.turn))
         |> confirmation_dialog(
           is_presented: @show_promotion_picker != nil,
           change: "promotion-dialog-changed",
@@ -111,7 +111,7 @@ defmodule ElixirconfChessWeb.ChessLive do
             modifiers={
               padding(:horizontal, 8)
               |> padding(:vertical, 4)
-              |> font(font: {:system, :subheadline, [weight: :bold]})
+              |> font({:system, :subheadline, [weight: :bold]})
               |> foreground_style({:color, :white})
               |> background(ElixirconfChessWeb.Colors.swiftui(:odd_background), in: :capsule)
             }
@@ -152,8 +152,8 @@ defmodule ElixirconfChessWeb.ChessLive do
 
       <Spacer />
 
-      <Text modifiers={font(font: {:system, :headline})}>Moves</Text>
-      <ScrollView axes="horizontal" modifiers={foreground_style({:hierarchical, :secondary}) |> font(font: {:system, :subheadline})}>
+      <Text modifiers={font({:system, :headline})}>Moves</Text>
+      <ScrollView axes="horizontal" modifiers={foreground_style({:hierarchical, :secondary}) |> font({:system, :subheadline})}>
         <HStack modifiers={padding(:bottom)}>
           <Text
             :for={{move, index} <- Enum.with_index(@game_state.move_history)}
