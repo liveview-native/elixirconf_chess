@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		004F45302AA0CE5700B959D0 /* ElixirConfChessWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 00934D322A748C3100A76A26 /* ElixirConfChessWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		00934CFF2A73187B00A76A26 /* ElixirConfChessApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934CFE2A73187B00A76A26 /* ElixirConfChessApp.swift */; };
 		00934D012A73187B00A76A26 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934D002A73187B00A76A26 /* ContentView.swift */; };
 		00934D032A73187D00A76A26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00934D022A73187D00A76A26 /* Assets.xcassets */; };
@@ -22,16 +21,6 @@
 		00CDF06E2A7C3304004BF4C5 /* ChessProgressViewStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CDF06D2A7C3304004BF4C5 /* ChessProgressViewStyle.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		004F45312AA0CE5700B959D0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 00934CF32A73187B00A76A26 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 00934D312A748C3100A76A26;
-			remoteInfo = "ElixirConfChessWatch Watch App";
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXCopyFilesBuildPhase section */
 		00934D252A748A3300A76A26 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -39,7 +28,6 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				004F45302AA0CE5700B959D0 /* ElixirConfChessWatch Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -166,7 +154,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				004F45322AA0CE5700B959D0 /* PBXTargetDependency */,
 			);
 			name = ElixirConfChess;
 			packageProductDependencies = (
@@ -279,14 +266,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		004F45322AA0CE5700B959D0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 00934D312A748C3100A76A26 /* ElixirConfChessWatch Watch App */;
-			targetProxy = 004F45312AA0CE5700B959D0 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		00934D082A73187D00A76A26 /* Debug */ = {
@@ -577,7 +556,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/liveview-native/liveview-client-swiftui";
 			requirement = {
-				branch = main;
+				branch = "background-app-disconnect";
 				kind = branch;
 			};
 		};

@@ -10,7 +10,7 @@ import LiveViewNative
 
 struct ContentView: View {
     var body: some View {
-        LiveView<ChessRegistry>(.automatic(URL(string: "https://chess.dockyard.com/")!), configuration: .init(navigationMode: .enabled))
+        LiveView<ChessRegistry>(.automatic(URL(string: "https://chess.dockyard.com/")!))
             #if os(macOS)
             .frame(idealWidth: 500, idealHeight: 700)
             #endif
@@ -48,9 +48,19 @@ enum ChessRegistry: RootRegistry {
         case .connectionFailed(let error):
             ConnectionErrorView(error: error)
         default:
-            ProgressView("Loading...")
-                .progressViewStyle(.chess)
-                .transition(.opacity)
+            switch url.path() {
+            case let path where path.hasPrefix("/game"):
+                ProgressView("Loading...")
+                    .progressViewStyle(.chess)
+                    .navigationTitle("Chess")
+            case "/":
+                ProgressView("Loading...")
+                    .progressViewStyle(.chess)
+                    .navigationTitle("Lobby")
+            default:
+                ProgressView("Loading...")
+                    .progressViewStyle(.chess)
+            }
         }
     }
     
