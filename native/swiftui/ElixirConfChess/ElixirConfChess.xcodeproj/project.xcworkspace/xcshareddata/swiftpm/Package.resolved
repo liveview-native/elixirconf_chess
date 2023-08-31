@@ -6,7 +6,7 @@
       "location" : "https://github.com/liveview-native/liveview-client-swiftui",
       "state" : {
         "branch" : "main",
-        "revision" : "10929f9078fcb9ed82ea6610a33ec62dbe76c447"
+        "revision" : "2a3df0b7422be9b919d301dca19c48a38d4c63b2"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
-        "version" : "1.2.2"
+        "revision" : "8f4d2753f0e4778c76d5f05ad16c74f707390531",
+        "version" : "1.2.3"
       }
     },
     {

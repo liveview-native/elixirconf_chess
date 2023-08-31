@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		004F45302AA0CE5700B959D0 /* ElixirConfChessWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 00934D322A748C3100A76A26 /* ElixirConfChessWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		00934CFF2A73187B00A76A26 /* ElixirConfChessApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934CFE2A73187B00A76A26 /* ElixirConfChessApp.swift */; };
 		00934D012A73187B00A76A26 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934D002A73187B00A76A26 /* ContentView.swift */; };
 		00934D032A73187D00A76A26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00934D022A73187D00A76A26 /* Assets.xcassets */; };
 		00934D072A73187D00A76A26 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00934D062A73187D00A76A26 /* Preview Assets.xcassets */; };
 		00934D0F2A7318BE00A76A26 /* LiveViewNative in Frameworks */ = {isa = PBXBuildFile; productRef = 00934D0E2A7318BE00A76A26 /* LiveViewNative */; };
-		00934D332A748C3100A76A26 /* ElixirConfChessWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 00934D322A748C3100A76A26 /* ElixirConfChessWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		00934D382A748C3100A76A26 /* ElixirConfChessWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934D372A748C3100A76A26 /* ElixirConfChessWatchApp.swift */; };
 		00934D3A2A748C3100A76A26 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00934D392A748C3100A76A26 /* ContentView.swift */; };
 		00934D3C2A748C3300A76A26 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 00934D3B2A748C3300A76A26 /* Assets.xcassets */; };
@@ -23,7 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		00934D342A748C3100A76A26 /* PBXContainerItemProxy */ = {
+		004F45312AA0CE5700B959D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 00934CF32A73187B00A76A26 /* Project object */;
 			proxyType = 1;
@@ -39,17 +39,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		00934D432A748C3300A76A26 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				00934D332A748C3100A76A26 /* ElixirConfChessWatch Watch App.app in Embed Watch Content */,
+				004F45302AA0CE5700B959D0 /* ElixirConfChessWatch Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -63,7 +53,6 @@
 		00934D022A73187D00A76A26 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		00934D042A73187D00A76A26 /* ElixirConfChess.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ElixirConfChess.entitlements; sourceTree = "<group>"; };
 		00934D062A73187D00A76A26 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		00934D2D2A748C3100A76A26 /* ElixirConfChessWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ElixirConfChessWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		00934D322A748C3100A76A26 /* ElixirConfChessWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ElixirConfChessWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		00934D372A748C3100A76A26 /* ElixirConfChessWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElixirConfChessWatchApp.swift; sourceTree = "<group>"; };
 		00934D392A748C3100A76A26 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -108,7 +97,6 @@
 			isa = PBXGroup;
 			children = (
 				00934CFB2A73187B00A76A26 /* ElixirConfChess.app */,
-				00934D2D2A748C3100A76A26 /* ElixirConfChessWatch.app */,
 				00934D322A748C3100A76A26 /* ElixirConfChessWatch Watch App.app */,
 			);
 			name = Products;
@@ -178,6 +166,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				004F45322AA0CE5700B959D0 /* PBXTargetDependency */,
 			);
 			name = ElixirConfChess;
 			packageProductDependencies = (
@@ -186,23 +175,6 @@
 			productName = ElixirConfChess;
 			productReference = 00934CFB2A73187B00A76A26 /* ElixirConfChess.app */;
 			productType = "com.apple.product-type.application";
-		};
-		00934D2C2A748C3100A76A26 /* ElixirConfChessWatch */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 00934D442A748C3300A76A26 /* Build configuration list for PBXNativeTarget "ElixirConfChessWatch" */;
-			buildPhases = (
-				00934D2B2A748C3100A76A26 /* Resources */,
-				00934D432A748C3300A76A26 /* Embed Watch Content */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				00934D352A748C3100A76A26 /* PBXTargetDependency */,
-			);
-			name = ElixirConfChessWatch;
-			productName = ElixirConfChessWatch;
-			productReference = 00934D2D2A748C3100A76A26 /* ElixirConfChessWatch.app */;
-			productType = "com.apple.product-type.application.watchapp2-container";
 		};
 		00934D312A748C3100A76A26 /* ElixirConfChessWatch Watch App */ = {
 			isa = PBXNativeTarget;
@@ -237,9 +209,6 @@
 					00934CFA2A73187B00A76A26 = {
 						CreatedOnToolsVersion = 15.0;
 					};
-					00934D2C2A748C3100A76A26 = {
-						CreatedOnToolsVersion = 15.0;
-					};
 					00934D312A748C3100A76A26 = {
 						CreatedOnToolsVersion = 15.0;
 					};
@@ -262,7 +231,6 @@
 			projectRoot = "";
 			targets = (
 				00934CFA2A73187B00A76A26 /* ElixirConfChess */,
-				00934D2C2A748C3100A76A26 /* ElixirConfChessWatch */,
 				00934D312A748C3100A76A26 /* ElixirConfChessWatch Watch App */,
 			);
 		};
@@ -275,13 +243,6 @@
 			files = (
 				00934D072A73187D00A76A26 /* Preview Assets.xcassets in Resources */,
 				00934D032A73187D00A76A26 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		00934D2B2A748C3100A76A26 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,10 +281,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		00934D352A748C3100A76A26 /* PBXTargetDependency */ = {
+		004F45322AA0CE5700B959D0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 00934D312A748C3100A76A26 /* ElixirConfChessWatch Watch App */;
-			targetProxy = 00934D342A748C3100A76A26 /* PBXContainerItemProxy */;
+			targetProxy = 004F45312AA0CE5700B959D0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -450,7 +411,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ElixirConfChess/ElixirConfChess.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"ElixirConfChess/Preview Content\"";
 				DEVELOPMENT_TEAM = 8YF596VCP4;
 				ENABLE_PREVIEWS = YES;
@@ -489,7 +450,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ElixirConfChess/ElixirConfChess.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"ElixirConfChess/Preview Content\"";
 				DEVELOPMENT_TEAM = 8YF596VCP4;
 				ENABLE_PREVIEWS = YES;
@@ -545,7 +506,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -575,38 +536,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
-		};
-		00934D452A748C3300A76A26 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_KEY_CFBundleDisplayName = ElixirConfChessWatch;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.carsonkatri.ElixirConfChessWatch;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		00934D462A748C3300A76A26 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_KEY_CFBundleDisplayName = ElixirConfChessWatch;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.carsonkatri.ElixirConfChessWatch;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -636,15 +566,6 @@
 			buildConfigurations = (
 				00934D412A748C3300A76A26 /* Debug */,
 				00934D422A748C3300A76A26 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		00934D442A748C3300A76A26 /* Build configuration list for PBXNativeTarget "ElixirConfChessWatch" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				00934D452A748C3300A76A26 /* Debug */,
-				00934D462A748C3300A76A26 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

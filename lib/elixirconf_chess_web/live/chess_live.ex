@@ -50,9 +50,40 @@ defmodule ElixirconfChessWeb.ChessLive do
           assigns
       ) do
     ~SWIFTUI"""
-    <VStack alignment="leading">
-      <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
-    </VStack>
+    <ScrollView
+      modifiers={
+        navigation_title(title: ElixirconfChess.GameState.description(@game_state))
+        |> navigation_bar_title_display_mode(display_mode: :inline)
+      }
+    >
+      <VStack alignment="leading">
+        <.player_chip
+          game_state={@game_state}
+          color={:black}
+          turn={@game_state.turn}
+          board={@game_state.board}
+          platform_id={:swiftui}
+          native={@native}
+
+          can_add_ai_opponent={@can_add_ai_opponent}
+        >
+          <%= chip_label(:black, @player_color, @game_state) %>
+        </.player_chip>
+        <.game_board game_state={@game_state} board={@game_state.board} selection={@selection} turn={@game_state.turn} platform_id={:swiftui} native={@native} />
+        <.player_chip
+          game_state={@game_state}
+          color={:white}
+          turn={@game_state.turn}
+          board={@game_state.board}
+          platform_id={:swiftui}
+          native={@native}
+
+          can_add_ai_opponent={@can_add_ai_opponent}
+        >
+          <%= chip_label(:white, @player_color, @game_state) %>
+        </.player_chip>
+      </VStack>
+    </ScrollView>
     """
   end
 

@@ -140,6 +140,24 @@ defmodule ElixirconfChessWeb.ChessComponents do
   attr :can_add_ai_opponent, :boolean
   slot :inner_block
 
+  def player_chip(%{platform_id: :swiftui, native: %{platform_config: %{user_interface_idiom: "watch"}}} = assigns) do
+    ~SWIFTUI"""
+    <HStack>
+      <%= if @can_add_ai_opponent and Map.get(@game_state, @color) == nil do %>
+        <Button
+          phx-click="add_ai_opponent"
+        >
+          <Label system-image="play.desktopcomputer">
+            Play against Nx
+          </Label>
+        </Button>
+      <% else %>
+        <Text modifiers={font(font: {:system, :headline}) |> padding([])}><%= render_slot(@inner_block) %></Text>
+      <% end %>
+    </HStack>
+    """
+  end
+
   def player_chip(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <HStack
