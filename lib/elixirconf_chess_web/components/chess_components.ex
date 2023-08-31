@@ -16,7 +16,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
       end
     %>
     <NamespaceContext id={:game_board} modifiers={layout_priority(1)}>
-      <Grid modifiers={aspect_ratio(1, content_mode: :fit) |> button_style(style: :plain) |> corner_radius(radius: 8)} horizontal-spacing={0} vertical-spacing={0}>
+      <Grid modifiers={aspect_ratio(1, content_mode: :fit) |> button_style(:plain) |> corner_radius(8)} horizontal-spacing={0} vertical-spacing={0}>
         <GridRow :for={y <- GameBoard.y_range}>
           <.tile
             :for={x <- GameBoard.x_range}
@@ -51,7 +51,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
             |> Enum.sort_by(fn {_, {_, _, id}} -> id end)
         %>
         <.tile_piece
-          :for={{{x, y}, value} <- sorted_pieces}
+          :for={{{x, y}, _} <- sorted_pieces}
           x={x}
           y={y}
           board={@board}
@@ -105,7 +105,6 @@ defmodule ElixirconfChessWeb.ChessComponents do
   def tile(%{platform_id: :web} = assigns) do
     ~H"""
     <button style={"background-color: #{tile_color({@x, @y}) |> Colors.web};"} class="aspect-square flex overflow-clip" phx-click="select" phx-value-x={@x} phx-value-y={@y}>
-      <% {color, image, _} = GameBoard.piece(@board, {@x, @y}) %>
       <div class="relative w-full h-full flex justify-center items-center">
         <div class="absolute w-full h-full" style={"background-color: #{overlay_color(@selection, @moves, {@x, @y}) |> Colors.web};"}></div>
       </div>
@@ -137,14 +136,33 @@ defmodule ElixirconfChessWeb.ChessComponents do
   attr :turn, :any
   attr :board, :any
   attr :platform_id, :any
+  attr :native, :any
   attr :can_add_ai_opponent, :boolean
   slot :inner_block
+
+  def player_chip(%{platform_id: :swiftui, native: %{platform_config: %{user_interface_idiom: "watch"}}} = assigns) do
+    ~SWIFTUI"""
+    <HStack>
+      <%= if @can_add_ai_opponent and Map.get(@game_state, @color) == nil do %>
+        <Button
+          phx-click="add_ai_opponent"
+        >
+          <Label system-image="play.desktopcomputer">
+            Play against Nx
+          </Label>
+        </Button>
+      <% else %>
+        <Text modifiers={font({:system, :headline}) |> padding()}><%= render_slot(@inner_block) %></Text>
+      <% end %>
+    </HStack>
+    """
+  end
 
   def player_chip(%{platform_id: :swiftui} = assigns) do
     ~SWIFTUI"""
     <HStack
       modifiers={
-        padding(insets: [top: 8, bottom: 8, leading: 8])
+        padding([top: 8, bottom: 8, leading: 8])
           |> frame(max_width: 9999999999, alignment: :leading)
           |> overlay(content: :check_warning)
           |> background({:color, Colors.swiftui(if @turn == @color, do: :odd_background, else: :even_background) |> elem(1)}, in: {:rounded_rectangle, radius: 8})
@@ -153,10 +171,10 @@ defmodule ElixirconfChessWeb.ChessComponents do
     >
       <RoundedRectangle template={:check_warning} corner-radius={8} modifiers={stroke_border(content: {:color, :red}, style: [line_width: (if GameBoard.in_check?(@game_state, @color), do: 4, else: 0)])} />
 
-      <Image system-name="person.crop.circle.fill" modifiers={font(font: {:system, :large_title})} />
+      <Image system-name="person.crop.circle.fill" modifiers={font({:system, :large_title})} />
       <VStack alignment="leading" modifiers={padding(:trailing, 8)}>
-        <Text modifiers={font(font: {:system, :headline, [weight: :bold]})}><%= render_slot(@inner_block) %></Text>
-        <Text modifiers={font(font: {:system, :caption})}><%= @color |> Atom.to_string() |> String.capitalize() %></Text>
+        <Text modifiers={font({:system, :headline, [weight: :bold]})}><%= render_slot(@inner_block) %></Text>
+        <Text modifiers={font({:system, :caption})}><%= @color |> Atom.to_string() |> String.capitalize() %></Text>
       </VStack>
       <%
         captures = Enum.map(
@@ -167,7 +185,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
       <ScrollView
         axes="horizontal"
         modifiers={
-          font(font: {:system, :large_title})
+          font({:system, :large_title})
           |> foreground_style({:color, GameBoard.enemy(@color)})
           |> overlay(alignment: :trailing, content: :ai_opponent)
         }

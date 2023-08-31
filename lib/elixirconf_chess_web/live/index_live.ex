@@ -23,12 +23,12 @@ defmodule ElixirconfChessWeb.IndexLive do
           </Button>
         </ToolbarItem>
       </Group>
-      <LazyVStack modifiers={button_style(style: :bordered_prominent) |> padding([])}>
+      <LazyVStack modifiers={button_style(:bordered_prominent) |> padding()}>
         <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
           <.play_button phx-click="join" phx-value-id={game_id} color={background_color(index, :swiftui)} foreground={button_foreground(index, :swiftui)} image="play.square.fill">
             <VStack alignment="leading" modifiers={frame(max_width: 99999999, alignment: :leading)}>
               <Text>Join Game</Text>
-              <Text modifiers={font(font: {:system, :subheadline}) |> foreground_style({:hierarchical, :secondary})}>
+              <Text modifiers={font({:system, :subheadline}) |> foreground_style({:hierarchical, :secondary})}>
                 <%= String.slice(game_id, 0..3) |> String.upcase() %>
               </Text>
             </VStack>
@@ -75,7 +75,7 @@ defmodule ElixirconfChessWeb.IndexLive do
         {@rest}
         modifiers={tint(color: @color |> elem(1)) |> foreground_style({:color, @foreground})}
       >
-        <Label system-image={@image} modifiers={frame(max_width: 99999) |> padding(8) |> font(font: {:system, :headline}) |> image_scale(scale: :large)}>
+        <Label system-image={@image} modifiers={frame(max_width: 99999) |> padding(8) |> font({:system, :headline}) |> image_scale(:large)}>
           <%= render_slot(@inner_block) %>
         </Label>
     </Button>

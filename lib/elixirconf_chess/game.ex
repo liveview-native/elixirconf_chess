@@ -41,7 +41,6 @@ defmodule ElixirconfChess.Game do
   end
 
   def handle_info(:ai_tick, %{game_state: %GameState{state: {:checkmate, _}}} = state), do: {:noreply, state}
-  def handle_info(:ai_tick, %{game_state: %GameState{state: {:checkmate, _}}} = state), do: {:noreply, state}
 
   def handle_info(:ai_tick, state) do
     {_eval, move} =
