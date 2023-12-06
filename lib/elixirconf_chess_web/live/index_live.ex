@@ -1,6 +1,6 @@
 defmodule ElixirconfChessWeb.IndexLive do
-  use Phoenix.LiveView
-  use LiveViewNative.LiveView
+  use ElixirconfChessWeb, :live_view
+  use ElixirconfChessWeb.Styles.AppStyles
 
   alias ElixirconfChess.GameState
   alias ElixirconfChess.GameMaster
@@ -10,30 +10,26 @@ defmodule ElixirconfChessWeb.IndexLive do
     {:ok, assign(socket, :games, GameMaster.list_games())}
   end
 
-  def render(%{platform_id: :swiftui} = assigns) do
+  def render(%{format: :swiftui} = assigns) do
     ~SWIFTUI"""
     <OpenGameListener />
-    <ScrollView modifiers={navigation_title(title: "Lobby") |> toolbar(content: :toolbar)}>
-      <Group template={:toolbar}>
-        <ToolbarItem>
-          <Button phx-click="create">
-            <Label system-image="plus.square.on.square">
-              Create Game
-            </Label>
-          </Button>
-        </ToolbarItem>
-      </Group>
-      <LazyVStack modifiers={button_style(:bordered_prominent) |> padding()}>
-        <%= for {game_id, index} <- Enum.with_index(Map.keys(@games)) do %>
-          <.play_button phx-click="join" phx-value-id={game_id} color={background_color(index, :swiftui)} foreground={button_foreground(index, :swiftui)} image="play.square.fill">
-            <VStack alignment="leading" modifiers={frame(max_width: 99999999, alignment: :leading)}>
-              <Text>Join Game</Text>
-              <Text modifiers={font({:system, :subheadline}) |> foreground_style({:hierarchical, :secondary})}>
-                <%= String.slice(game_id, 0..3) |> String.upcase() %>
-              </Text>
-            </VStack>
-          </.play_button>
-        <% end %>
+    <ScrollView class="navigation-title toolbar:toolbar" title="Lobby">
+      <ToolbarItem template={:toolbar}>
+        <Button phx-click="create">
+          <Label system-image="plus.square.on.square">
+            Create Game
+          </Label>
+        </Button>
+      </ToolbarItem>
+      <LazyVStack class="button-style-prominent padding">
+        <.play_button :for={{game_id, index} <- Enum.with_index(Map.keys(@games))} phx-click="join" phx-value-id={game_id} color={background_color(index, :swiftui)} foreground={button_foreground(index, :swiftui)} image="play.square.fill">
+          <VStack alignment="leading" class="full-width:leading">
+            <Text>Join Game</Text>
+            <Text class="font-subheadline">
+              <%= String.slice(game_id, 0..3) |> String.upcase() %>
+            </Text>
+          </VStack>
+        </.play_button>
       </LazyVStack>
     </ScrollView>
     """
@@ -72,10 +68,10 @@ defmodule ElixirconfChessWeb.IndexLive do
   def play_button(assigns) do
     ~SWIFTUI"""
     <Button
-        {@rest}
-        modifiers={tint(color: @color |> elem(1)) |> foreground_style({:color, @foreground})}
-      >
-        <Label system-image={@image} modifiers={frame(max_width: 99999) |> padding(8) |> font({:system, :headline}) |> image_scale(:large)}>
+      {@rest}
+      class="tint-even_background odd_background"
+    >
+        <Label system-image={@image} class="full-width:center p-8 font-headline image-scale-large">
           <%= render_slot(@inner_block) %>
         </Label>
     </Button>

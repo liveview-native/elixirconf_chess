@@ -43,26 +43,26 @@ enum ChessRegistry: RootRegistry {
         }
     }
     
-    static func loadingView(for url: URL, state: LiveSessionState) -> some View {
-        switch state {
-        case .connectionFailed(let error):
-            ConnectionErrorView(error: error)
-        default:
-            switch url.path() {
-            case let path where path.hasPrefix("/game"):
-                ProgressView("Loading...")
-                    .progressViewStyle(.chess)
-                    .navigationTitle("Chess")
-            case "/":
-                ProgressView("Loading...")
-                    .progressViewStyle(.chess)
-                    .navigationTitle("Lobby")
-            default:
-                ProgressView("Loading...")
-                    .progressViewStyle(.chess)
-            }
-        }
-    }
+//    static func loadingView(for url: URL, state: LiveSessionState) -> some View {
+//        switch state {
+//        case .connectionFailed(let error):
+//            ConnectionErrorView(error: error)
+//        default:
+//            switch url.path() {
+//            case let path where path.hasPrefix("/game"):
+//                ProgressView("Loading...")
+//                    .progressViewStyle(.chess)
+////                    .navigationTitle("Chess")
+//            case "/":
+//                ProgressView("Loading...")
+//                    .progressViewStyle(.chess)
+////                    .navigationTitle("Lobby")
+//            default:
+//                ProgressView("Loading...")
+//                    .progressViewStyle(.chess)
+//            }
+//        }
+//    }
     
     static func errorView(for error: Error) -> some View {
         ProgressView()

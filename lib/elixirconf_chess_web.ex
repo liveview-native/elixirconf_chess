@@ -52,6 +52,7 @@ defmodule ElixirconfChessWeb do
     quote do
       use Phoenix.LiveView,
         layout: {ElixirconfChessWeb.Layouts, :app}
+      use LiveViewNative.LiveView
 
       unquote(html_helpers())
     end

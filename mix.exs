@@ -32,20 +32,20 @@ defmodule ElixirconfChess.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.7.2"},
+      {:phoenix, "~> 1.7.7"},
       {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.18.16"},
+      {:phoenix_live_view, ">= 0.18.0"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.7.2"},
+      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:live_view_native, "~> 0.0.9"},
-      {:live_view_native_swift_ui, "~> 0.0.10"},
+      {:live_view_native, github: "liveview-native/live_view_native", branch: "main"},
+      {:live_view_native_swift_ui, github: "liveview-native/liveview-client-swiftui", branch: "main"},
       {:axon, "~> 0.6"},
       {:exla, "~> 0.6"}
     ]

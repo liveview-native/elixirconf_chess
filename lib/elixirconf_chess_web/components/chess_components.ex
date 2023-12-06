@@ -1,11 +1,12 @@
 defmodule ElixirconfChessWeb.ChessComponents do
   use Phoenix.Component
   use LiveViewNative.Component
+  use ElixirconfChessWeb.Styles.AppStyles
 
   alias ElixirconfChess.GameBoard
   alias ElixirconfChessWeb.Colors
 
-  def game_board(%{platform_id: :swiftui} = assigns) do
+  def game_board(%{format: :swiftui} = assigns) do
     ~SWIFTUI"""
     <%
       moves = case @selection do
@@ -15,8 +16,8 @@ defmodule ElixirconfChessWeb.ChessComponents do
           GameBoard.possible_moves(@game_state, selection) |> Enum.map(& &1.destination)
       end
     %>
-    <NamespaceContext id={:game_board} modifiers={layout_priority(1)}>
-      <Grid modifiers={aspect_ratio(1, content_mode: :fit) |> button_style(:plain) |> corner_radius(8)} horizontal-spacing={0} vertical-spacing={0}>
+    <NamespaceContext id={:game_board} class="layout-priority-1">
+      <Grid class="aspect-square button-style-plain corner-radius-8" horizontal-spacing={0} vertical-spacing={0}>
         <GridRow :for={y <- GameBoard.y_range}>
           <.tile
             :for={x <- GameBoard.x_range}
@@ -25,8 +26,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
             board={@board}
             selection={@selection}
             moves={moves}
-            native={@native}
-            platform_id={:swiftui}
+            format={:swiftui}
           />
         </GridRow>
       </Grid>
@@ -34,7 +34,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
-  def game_board(%{platform_id: :web} = assigns) do
+  def game_board(%{format: :web} = assigns) do
     ~H"""
     <% moves =
       case @selection do
@@ -57,20 +57,19 @@ defmodule ElixirconfChessWeb.ChessComponents do
           board={@board}
           selection={@selection}
           moves={moves}
-          native={@native}
-          platform_id={:web}
+          format={:web}
         />
       </div>
       <div class="grid grid-cols-8 grid-rows-8 w-full h-full">
         <%= for y <- GameBoard.y_range do %>
-          <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} native={@native} platform_id={:web} />
+          <.tile :for={x <- GameBoard.x_range()} x={x} y={y} board={@board} selection={@selection} moves={moves} format={:web} />
         <% end %>
       </div>
     </div>
     """
   end
 
-  def tile(%{platform_id: :swiftui} = assigns) do
+  def tile(%{format: :swiftui} = assigns) do
     ~SWIFTUI"""
     <Button
       phx-click="select"
@@ -78,31 +77,37 @@ defmodule ElixirconfChessWeb.ChessComponents do
       phx-value-y={@y}
     >
       <Rectangle
-        modifiers={
-          foreground_style(tile_color({@x, @y}) |> Colors.swiftui)
-            |> overlay(style: overlay_color(@selection, @moves, {@x, @y}) |> Colors.swiftui)
-            |> overlay(content: :content)
-            |> clipped([])
-        }
+        class="font-largeTitle overlay:fill overlay:content clipped"
       >
         <%
+          overlay = overlay_color(@selection, @moves, {@x, @y}) |> Colors.rgba
+        %>
+        <Color template={:fill} red={overlay.red} green={overlay.green} blue={overlay.blue} opacity={overlay.opacity} />
+        <%
           {color, image, id} = GameBoard.piece(@board, {@x, @y})
-          font_size = if @native.platform_config.user_interface_idiom == "watch", do: 17, else: 50
-          piece_modifiers = font(font: {:system, [size: font_size]}) |> foreground_style({:color, color})
+          font_size = 50
+          dbg color
         %>
         <Text
           template={:content}
-          {if id != nil, do: %{ id: to_string(id) }, else: %{}}
+          {if id != nil, do: %{ id: to_string(id) }, else: %{ id: "#{@x},#{@y}" }}
           verbatim={image}
-          modifiers={
-            if id != nil, do: piece_modifiers |> matched_geometry_effect(id: to_string(id), namespace: :game_board), else: piece_modifiers
-          } />
+          :if={color == :white}
+          class="foreground-color-white matched-geometry-effect:game_board"
+        />
+        <Text
+          template={:content}
+          {if id != nil, do: %{ id: to_string(id) }, else: %{ id: "#{@x},#{@y}" }}
+          verbatim={image}
+          :if={color == :black}
+          class="foreground-color-black matched-geometry-effect:game_board"
+        />
       </Rectangle>
     </Button>
     """
   end
 
-  def tile(%{platform_id: :web} = assigns) do
+  def tile(%{format: :web} = assigns) do
     ~H"""
     <button style={"background-color: #{tile_color({@x, @y}) |> Colors.web};"} class="aspect-square flex overflow-clip" phx-click="select" phx-value-x={@x} phx-value-y={@y}>
       <div class="relative w-full h-full flex justify-center items-center">
@@ -112,7 +117,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
-  def tile_piece(%{ platform_id: :web } = assigns) do
+  def tile_piece(%{ format: :web } = assigns) do
     ~H"""
     <%
       {color, image, id} = GameBoard.piece(@board, {@x, @y})
@@ -135,12 +140,12 @@ defmodule ElixirconfChessWeb.ChessComponents do
   attr :color, :any
   attr :turn, :any
   attr :board, :any
-  attr :platform_id, :any
+  attr :format, :any
   attr :native, :any
   attr :can_add_ai_opponent, :boolean
   slot :inner_block
 
-  def player_chip(%{platform_id: :swiftui, native: %{platform_config: %{user_interface_idiom: "watch"}}} = assigns) do
+  def player_chip(%{format: :swiftui, native: %{platform_config: %{user_interface_idiom: "watch"}}} = assigns) do
     ~SWIFTUI"""
     <HStack>
       <%= if @can_add_ai_opponent and Map.get(@game_state, @color) == nil do %>
@@ -152,29 +157,24 @@ defmodule ElixirconfChessWeb.ChessComponents do
           </Label>
         </Button>
       <% else %>
-        <Text modifiers={font({:system, :headline}) |> padding()}><%= render_slot(@inner_block) %></Text>
+        <Text class="font-headline padding"><%= render_slot(@inner_block) %></Text>
       <% end %>
     </HStack>
     """
   end
 
-  def player_chip(%{platform_id: :swiftui} = assigns) do
+  def player_chip(%{format: :swiftui} = assigns) do
     ~SWIFTUI"""
     <HStack
-      modifiers={
-        padding([top: 8, bottom: 8, leading: 8])
-          |> frame(max_width: 9999999999, alignment: :leading)
-          |> overlay(content: :check_warning)
-          |> background({:color, Colors.swiftui(if @turn == @color, do: :odd_background, else: :even_background) |> elem(1)}, in: {:rounded_rectangle, radius: 8})
-          |> foreground_style({:color, @color})
-        }
+      class="pv-8 pl-8 full-width:leading overlay:check_warning fill-attr"
+      fill={if @turn == @color, do: "odd_background", else: "even_background"}
     >
-      <RoundedRectangle template={:check_warning} corner-radius={8} modifiers={stroke_border(content: {:color, :red}, style: [line_width: (if GameBoard.in_check?(@game_state, @color), do: 4, else: 0)])} />
+      <RoundedRectangle template={:check_warning} corner-radius={8} class="stroke-check" thickness={if GameBoard.in_check?(@game_state, @color), do: 4, else: 0} />
 
-      <Image system-name="person.crop.circle.fill" modifiers={font({:system, :large_title})} />
-      <VStack alignment="leading" modifiers={padding(:trailing, 8)}>
-        <Text modifiers={font({:system, :headline, [weight: :bold]})}><%= render_slot(@inner_block) %></Text>
-        <Text modifiers={font({:system, :caption})}><%= @color |> Atom.to_string() |> String.capitalize() %></Text>
+      <Image system-name="person.crop.circle.fill" class="font-largeTitle" />
+      <VStack alignment="leading" class="pr-8">
+        <Text class="font-headline"><%= render_slot(@inner_block) %></Text>
+        <Text class="font-caption"><%= @color |> Atom.to_string() |> String.capitalize() %></Text>
       </VStack>
       <%
         captures = Enum.map(
@@ -184,11 +184,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
       %>
       <ScrollView
         axes="horizontal"
-        modifiers={
-          font({:system, :large_title})
-          |> foreground_style({:color, GameBoard.enemy(@color)})
-          |> overlay(alignment: :trailing, content: :ai_opponent)
-        }
+        class="font-largeTitle overlay:ai_opponent"
       >
         <HStack>
           <Text
@@ -202,11 +198,8 @@ defmodule ElixirconfChessWeb.ChessComponents do
           <Button
             :if={@can_add_ai_opponent and Map.get(@game_state, @color) == nil}
             phx-click="add_ai_opponent"
-            modifiers={
-              padding(8)
-              |> background(Colors.swiftui(if @turn == @color, do: :even_background, else: :odd_background), in: {:rounded_rectangle, radius: 6})
-              |> padding(:trailing, 8)
-            }
+            class="fill-attr"
+            fill={if @turn == @color, do: "even_background", else: "odd_background"}
           >
             <Label system-image="play.desktopcomputer">
               Play against Nx
@@ -218,7 +211,7 @@ defmodule ElixirconfChessWeb.ChessComponents do
     """
   end
 
-  def player_chip(%{platform_id: :web} = assigns) do
+  def player_chip(%{format: :web} = assigns) do
     ~SWIFTUI"""
     <div class={"w-full flex flex-row my-2 py-2 px-4 rounded-md " <> if(GameBoard.in_check?(@game_state, @color), do: "border-4 border-rose-500", else: "")} style={"background-color: #{Colors.web(if @turn == @color, do: :odd_background, else: :even_background)}"}>
       <div class="flex flex-col">

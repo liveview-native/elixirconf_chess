@@ -72,14 +72,8 @@ struct ConnectionErrorView: View {
             .multilineTextAlignment(.center)
         }
         .padding()
-    }
-}
-
-extension Color {
-    static var evenBackground: Color {
-        .init(red: 1, green: 0.8, blue: 0.62)
-    }
-    static var oddBackground: Color {
-        .init(red: 0.82, green: 0.54, blue: 0.28)
+        .task {
+            fatalError(error.localizedDescription)
+        }
     }
 }

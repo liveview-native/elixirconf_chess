@@ -7,13 +7,7 @@ defmodule ElixirconfChessWeb.Colors do
   def rgba(:clear), do: %{red: 1, green: 1, blue: 1, opacity: 0}
 
   def swiftui(color) do
-    case rgba(color) do
-      %{opacity: 1} = color ->
-        {:color, {:srgb, color}}
-
-      color ->
-        {:color, {:srgb, color}, [opacity: color.opacity]}
-    end
+    color |> Atom.to_string
   end
 
   def web(color) do

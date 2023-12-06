@@ -17,6 +17,10 @@ config :elixirconf_chess, ElixirconfChessWeb.Endpoint,
   pubsub_server: ElixirconfChess.PubSub,
   live_view: [signing_salt: "F0K5meEF"]
 
+config :mime, :types, %{
+  "application/swiftui" => ["swiftui"]
+}
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
@@ -48,7 +52,12 @@ config :phoenix, :json_library, Jason
 
 config :live_view_native,
   plugins: [
-    LiveViewNativeSwiftUi
+    LiveViewNative.SwiftUI
+  ]
+
+config :live_view_native_stylesheet,
+  parsers: [
+    swiftui: LiveViewNative.SwiftUI.RulesParser
   ]
 
 # Import environment specific config. This must remain at the bottom
