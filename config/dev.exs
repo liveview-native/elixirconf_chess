@@ -47,7 +47,7 @@ config :elixirconf_chess, ElixirconfChessWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/elixirconf_chess_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/elixirconf_chess_web/(controllers|live|components|styles)/.*(ex|heex)$"
     ]
   ]
 

@@ -44,7 +44,7 @@ defmodule ElixirconfChess.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:live_view_native, github: "liveview-native/live_view_native", branch: "main"},
+      {:live_view_native, github: "liveview-native/live_view_native", branch: "layout-and-stylesheet-fixes"},
       {:live_view_native_swift_ui, github: "liveview-native/liveview-client-swiftui", branch: "main"},
       {:axon, "~> 0.6"},
       {:exla, "~> 0.6"}

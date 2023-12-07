@@ -13,7 +13,7 @@
   "file_system": {:hex, :file_system, "0.2.10", "fb082005a9cd1711c05b5248710f8826b02d7d1784e7c3451f9c1231d4fc162d", [:mix], [], "hexpm", "41195edbfb562a593726eda3b3e8b103a309b733ad25f3d642ba49696bf715dc"},
   "floki": {:hex, :floki, "0.35.2", "87f8c75ed8654b9635b311774308b2760b47e9a579dabf2e4d5f1e1d42c39e0b", [:mix], [], "hexpm", "6b05289a8e9eac475f644f09c2e4ba7e19201fd002b89c28c1293e7bd16773d9"},
   "jason": {:hex, :jason, "1.4.1", "af1504e35f629ddcdd6addb3513c3853991f694921b1b9368b0bd32beb9f1b63", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "fbb01ecdfd565b56261302f7e1fcc27c4fb8f32d56eab74db621fc154604a7a1"},
-  "live_view_native": {:git, "https://github.com/liveview-native/live_view_native.git", "4b2ce02fc28d8a79e95ef147e194b3cf5bd5a001", [branch: "main"]},
+  "live_view_native": {:git, "https://github.com/liveview-native/live_view_native.git", "fcbfc9896384ca37b52453b5514d65c465f4a158", [branch: "layout-and-stylesheet-fixes"]},
   "live_view_native_platform": {:hex, :live_view_native_platform, "0.2.0-beta.2", "8cd8eb8d18e2250bc497f1e0a5338430783ec97bf9f64b148df4bfb267c32ec4", [:mix], [{:ecto, "~> 3.8", [hex: :ecto, repo: "hexpm", optional: false]}, {:jason, "~> 1.2", [hex: :jason, repo: "hexpm", optional: false]}, {:phoenix_html, "~> 3.0", [hex: :phoenix_html, repo: "hexpm", optional: false]}], "hexpm", "2ee4626999348e643736e5993aa6f1458754e4c73b58b84197f2b446eb48ce50"},
   "live_view_native_stylesheet": {:git, "https://github.com/liveview-native/live_view_native_stylesheet.git", "1698d73fd7809f7edc8b7f726d95a885b50fcc21", []},
   "live_view_native_swift_ui": {:git, "https://github.com/liveview-native/liveview-client-swiftui.git", "fa580b0129d98a1841a5bc0266d098102f19cbc6", [branch: "main"]},

@@ -76,33 +76,37 @@ defmodule ElixirconfChessWeb.ChessComponents do
       phx-value-x={@x}
       phx-value-y={@y}
     >
-      <Rectangle
-        class="font-largeTitle overlay:fill overlay:content clipped"
+      <%
+        fill = tile_color({@x, @y}) |> Colors.rgba
+        overlay = overlay_color(@selection, @moves, {@x, @y}) |> Colors.rgba
+      %>
+      <Color
+        class="overlay:fill overlay:content clipped"
+        red={fill.red}
+        green={fill.green}
+        blue={fill.blue}
+        opacity={fill.opacity}
       >
-        <%
-          overlay = overlay_color(@selection, @moves, {@x, @y}) |> Colors.rgba
-        %>
         <Color template={:fill} red={overlay.red} green={overlay.green} blue={overlay.blue} opacity={overlay.opacity} />
         <%
           {color, image, id} = GameBoard.piece(@board, {@x, @y})
           font_size = 50
-          dbg color
         %>
         <Text
           template={:content}
           {if id != nil, do: %{ id: to_string(id) }, else: %{ id: "#{@x},#{@y}" }}
           verbatim={image}
           :if={color == :white}
-          class="foreground-color-white matched-geometry-effect:game_board"
+          class="font-largeTitle foreground-color-white matched-geometry-effect:game_board"
         />
         <Text
           template={:content}
           {if id != nil, do: %{ id: to_string(id) }, else: %{ id: "#{@x},#{@y}" }}
           verbatim={image}
           :if={color == :black}
-          class="foreground-color-black matched-geometry-effect:game_board"
+          class="font-largeTitle foreground-color-black matched-geometry-effect:game_board"
         />
-      </Rectangle>
+      </Color>
     </Button>
     """
   end
@@ -166,9 +170,10 @@ defmodule ElixirconfChessWeb.ChessComponents do
   def player_chip(%{format: :swiftui} = assigns) do
     ~SWIFTUI"""
     <HStack
-      class="pv-8 pl-8 full-width:leading overlay:check_warning fill-attr"
+      class="py-8 pl-8 full-width:leading overlay:check_warning background:fill"
       fill={if @turn == @color, do: "odd_background", else: "even_background"}
     >
+      <Color template="fill" red={1} green={0} blue={0} opacity={1} />
       <RoundedRectangle template={:check_warning} corner-radius={8} class="stroke-check" thickness={if GameBoard.in_check?(@game_state, @color), do: 4, else: 0} />
 
       <Image system-name="person.crop.circle.fill" class="font-largeTitle" />
@@ -198,8 +203,6 @@ defmodule ElixirconfChessWeb.ChessComponents do
           <Button
             :if={@can_add_ai_opponent and Map.get(@game_state, @color) == nil}
             phx-click="add_ai_opponent"
-            class="fill-attr"
-            fill={if @turn == @color, do: "even_background", else: "odd_background"}
           >
             <Label system-image="play.desktopcomputer">
               Play against Nx

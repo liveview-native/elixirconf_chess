@@ -26,10 +26,6 @@ defmodule ElixirconfChessWeb.Styles.AppStyles do
     foregroundStyle(to_ime(color))
   end
 
-  "fill-attr" do
-    foregroundStyle(attr("fill"))
-  end
-
   "even_background" do
     foregroundStyle(Color(.sRGB, red: 1, green: 0.8, blue: 0.62, opacity: 1))
   end
@@ -52,6 +48,10 @@ defmodule ElixirconfChessWeb.Styles.AppStyles do
 
   "overlay:" <> content do
     overlay(content: to_atom(content))
+  end
+
+  "background:" <> content do
+    background(alignment: .center, content: to_atom(content))
   end
 
   "clipped" do

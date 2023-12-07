@@ -19,6 +19,7 @@ defmodule ElixirconfChessWeb.Router do
     pipe_through :browser
 
     live "/", IndexLive
+    live "/game", ChessLive
     live "/game/:id", ChessLive
 
     get "/privacy-policy", PageController, :privacy
